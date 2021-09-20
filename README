@@ -1,0 +1,23 @@
+Fmoad Cailin
+============
+
+Partial reimplementation of FMOD.
+
+Once a great stronghold, now much of it stands in ruins.
+
+Similar project: https://github.com/moon-chilled/openfmod
+
+What You Need
+-------------
+
+* fsb-extract-dumb
+* python-fsb5 with extract.py (fsb5-extract module on OpenBSD)
+* manifest files
+* ...
+
+How To Use
+----------
+
+... under construction ...
+
+License: ISC
