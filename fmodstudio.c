@@ -7,58 +7,7 @@ int FMOD_Studio_System_Create()
 
 int FMOD_Studio_System_Initialize()
 {
-	/*
-	FILE *f;
-	f = fopen("fmod.log", "a");
-	fprintf(f, "FMOD_Studio_System_Initialize\n");
-	*/
-
-	/*
-	dev = alcOpenDevice(NULL);
-	if (!dev) {
-		printf("ERROR: Couldn't open openal device\n");
-		abort();
-	}
-	context = alcCreateContext(dev, NULL);
-	if (!alcMakeContextCurrent(context)) {
-		printf("ERROR: Couldn't make context current\n");
-		abort();
-	}
-
-	alGenSources((ALuint)1, &source);
-	// FIXME: check for errors
-	alSourcef(source, AL_PITCH, 1);
-	// FIXME: check for errors
-	alSourcef(source, AL_GAIN, 1);
-	// FIXME: check for errors
-	alSource3f(source, AL_POSITION, 0, 0, 0);
-	// FIXME: check for errors
-	alSource3f(source, AL_VELOCITY, 0, 0, 0);
-	// FIXME: check for errors
-	alSourcei(source, AL_LOOPING, AL_FALSE);
-	// FIXME: check for errors
-
-	alGenBuffers((ALuint)1, &buffer);
-	// FIXME: check for errors
-
-	ALenum format;
-	ALsizei freq;
-	char bufferData[BUFFER_SIZE];
-	ALint state;
-
-	LoadOGG("/home/thfr/games/fnaify/celeste/fmod_complete_project/unzipped/fmodstudio10000celeste-project/FMOD Studio Celeste Project/Assets/ui/world_map/ui_world_chapter_level_select.ogg", &bufferData, &format, &freq);
-
-	alBufferData(buffer, format, &bufferData[0],  bufferData.size(), freq);
-	alSourcei(source, AL_BUFFER, buffer);
-
-	alSourcePlay(source);
-	do {
-		// Query the state of the souce
-		alGetSourcei(source, AL_SOURCE_STATE, &state);
-	} while (state != AL_STOPPED);
-	*/
-
-	return 0;
+	STUB();
 }
 
 int FMOD_Studio_System_SetListenerAttributes()
