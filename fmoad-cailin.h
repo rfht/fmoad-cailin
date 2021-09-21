@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <dirent.h>
 #include <json-c/json.h>
@@ -99,14 +98,6 @@ typedef enum FMOD_RESULT {
 
 #define FMOD_VECTOR			float
 
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod.h
-typedef struct FMOD_GUID {
-	unsigned int Data1;
-	unsigned short Data2;
-	unsigned short Data3;
-	unsigned char Data4[8];
-} FMOD_GUID;
-
 typedef struct {
 	FMOD_VECTOR position;
 	FMOD_VECTOR velocity;
@@ -114,66 +105,19 @@ typedef struct {
 	FMOD_VECTOR up;
 } FMOD_3D_ATTRIBUTES;
 
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod-internal.h
-typedef struct {
-	const char *key;
-	FMOD_GUID val;
-} *MapPathToGuid;
-
-struct FMOD_SOUND {
-	bool is_mem, is_loaded;
-	void *handle;	// TODO: use something like GaHandle
-	const char *fpath;
-};
-
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod-internal.h
-struct FMOD_STUDIO_SYSTEM {
-	FMOD_SYSTEM *system;
-	// TODO: add something like gorilla audio's struct ga
-	MapPathToGuid pathmap;
-	MapGuidToEventDescr sounds;
-};
-
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod-internal.h
-struct FMOD_SOUND {
-	bool is_mem, is_loaded;
-	void *handle;	// TODO: use an OpenAL handle
-	const char *fpath;
-};
-
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod-internal.h
-struct FMOD_STUDIO_EVENTDESCRIPTION {
-	FMOD_STUDIO_SYSTEM *sys;
-	const char *path;
-	FMOD_SOUND **sounds;
-};
-
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod-internal.h
-typedef struct {
-	FMOD_GUID key;
-	FMOD_STUDIO_EVENTDESCRIPTION *val;
-} *MapGuidToEventDescr;
-
-// from https://github.com/moon-chilled/openfmod/blob/master/include/openfmod-internal.h
-struct FMOD_STUDIO_BANK {
-	FMOD_STUDIO_SYSTEM *sys;
-	char *dir;
-	char *basename;
-	MapGuidToEventDescr sounds;
-};
-
+#define FMOD_STUDIO_SYSTEM		int
 #define FMOD_SYSTEM			int
 #define FMOD_STUDIO_INITFLAGS		unsigned int
 #define FMOD_INITFLAGS			unsigned int
 #define FMOD_STUDIO_LOAD_BANK_FLAGS	unsigned int
-#define FMOD_STUDIO_VCA			int
+#define FMOD_STUDIO_BANK		int	// XXX: may be wrong type
 
 #define STUB() do { \
 	fprintf(stderr, "%s: STUB\n", __func__); \
 	return FMOD_OK; \
 } while (0)
 
-FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank);
+FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(int *bank);
 FMOD_RESULT FMOD_Studio_Bus_GetPaused(int *bus, int *paused);
 FMOD_RESULT FMOD_Studio_Bus_SetPaused(int *bus, int paused);
 FMOD_RESULT FMOD_Studio_Bus_StopAllEvents(int *bus, int mode);
@@ -200,7 +144,7 @@ FMOD_RESULT FMOD_Studio_System_GetBus(int *system, char *path, int **bus);
 FMOD_RESULT FMOD_Studio_System_GetEvent(int *system, char *path, int **event);
 FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(int *system, int **lowLevelSystem);
 FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(int *system, int listener, int *attributes);
-FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, const char *path, FMOD_STUDIO_VCA **vca);
+FMOD_RESULT FMOD_Studio_System_GetVCA(int *system, char *path, int **vca);
 FMOD_RESULT FMOD_Studio_System_Initialize();
 FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system, const char *filename, FMOD_STUDIO_LOAD_BANK_FLAGS flags, FMOD_STUDIO_BANK **bank);
 FMOD_RESULT FMOD_Studio_System_Release(int *system);

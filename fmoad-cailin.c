@@ -41,16 +41,13 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	size_t dstsize = fnlen - 4;
 	char shortname[dstsize];
 	strlcpy(shortname, filename, sizeof(shortname));
-	fprintf(stderr, "filename: %s, shortname: %s, p: %p, pp: %p\n", filename, shortname, bank, *bank);
+	fprintf(stderr, "filename: %s, fnlen: %d, shortname: %s\n", filename, (int)fnlen, shortname);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system,
-	const char *path, FMOD_STUDIO_VCA **vca)
+FMOD_RESULT FMOD_Studio_System_GetVCA(int *system, char *path, int **vca)
 {
-	// VCAs are groups of buses for volume control
-	fprintf(stderr, "VCA path: %s\n", path);
 	STUB();
 }
 
@@ -59,10 +56,8 @@ FMOD_RESULT FMOD_Studio_VCA_SetVolume(int *vca, float volume)
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_VCA_GetVolume(FMOD_STUDIO_VCA *vca, float *volume, float *finalvolume)
+FMOD_RESULT FMOD_Studio_VCA_GetVolume(int *vca, float *volume, float *finalvolume)
 {
-	// volume: receives the set volume. 0 or NULL to ignore.
-	// finalvolume: receives final combined volume. 0 or NULL to ignore.
 	STUB();
 }
 
@@ -144,8 +139,6 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 	 * may need to walk through all .ogg files in the bank directory
 	 */
 
-	fprintf(stderr, "bank: %p, %p\n", bank, &bank);
-
 	// TEMPORARY: load sfx.banko only once!
 	if (SFX_LOADED)
 		STUB();
@@ -157,8 +150,7 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 	d = opendir(bankpath);
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
-			//fprintf(stderr, "sample data found: %s\n", dir->d_name);
-			// TODO: load the sample into a StreamingAudioData struct
+			fprintf(stderr, "sample data found: %s\n", dir->d_name);
 		}
 		closedir(d);
 	}
