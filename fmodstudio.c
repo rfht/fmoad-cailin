@@ -96,6 +96,7 @@ int FMOD_Studio_System_GetEvent(int *system, char *path, int **event)
 	FILE *f;
 	f = fopen("fmod.log", "a");
 	fprintf(f, "FMOD_Studio_System_GetEvent: %s, event: %p\n", path, (void *) event);
+	// this likely corresponds to: ./Content/FMOD/Desktop/sfx.banko/sfx-char_mad_jump.ogg
 	if (!strncmp(path, "event:/char/madeline/jump", 26)) {
 		*event = (int *) "9";
 	} else {
@@ -157,7 +158,7 @@ int FMOD_Studio_EventDescription_GetPath(int *eventdescription, char *path, int 
 	FILE *f;
 	f = fopen("fmod.log", "a");
 	fprintf(f, "FMOD_Studio_EventDescription_GetPath: %s, %d\n", path, size);
-	path = "event:/env/amb/worldmap\0";
+	path = "event:/env/amb/worldmap\0";	# corresponds to ./Content/FMOD/Desktop/sfx.banko/sfx-env_amb_worldmap.ogg
 	*retrieved = 24;
 	return 0;
 }

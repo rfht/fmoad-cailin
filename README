@@ -13,11 +13,31 @@ What You Need
 * fsb-extract-dumb
 * python-fsb5 with extract.py (fsb5-extract module on OpenBSD)
 * manifest files
+* json-c
 * ...
 
 How To Use
 ----------
 
 ... under construction ...
+
+JSON Files
+----------
+
+* find basename with jq:
+
+```
+$ jq '.events[] | select(.path == "event:/char/madeline/jump") | .files[] | .filename' path/to/file.json
+$ # => returns "char_mad_jump"
+```
+* prepend name of the database:
+```
+$ jq '.path' path/to/file.json
+$ # => returns ""bank:/sfx"
+```
+* construct the final path with directories and extension:
+```
+./Content/FMOD/Desktop/sfx.banko/sfx-char_mad_jump.ogg
+```
 
 License: ISC
