@@ -1,8 +1,9 @@
 #include "fmodstudio.h"
 #include "al.h"
 
-FMOD_RESULT FMOD_Studio_System_Create()
+FMOD_RESULT FMOD_Studio_System_Create(FMOD_STUDIO_SYSTEM **system, unsigned int headerversion)
 {
+	// TODO: create new system object at the address **system; log headerversion
 	STUB();
 }
 
