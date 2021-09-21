@@ -35,8 +35,14 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	const char *filename, FMOD_STUDIO_LOAD_BANK_FLAGS flags,
 	FMOD_STUDIO_BANK **bank)
 {
-	// TODO: get filename
-	fprintf(stderr, "filename: %s\n", filename);
+	size_t fnlen;
+	fnlen = strnlen(filename, MAXSTR);
+	// drop the extension ".bank" which should be on all these filenames
+	size_t dstsize = fnlen - 4;
+	char shortname[dstsize];
+	strlcpy(shortname, filename, sizeof(shortname));
+	fprintf(stderr, "filename: %s, fnlen: %d, shortname: %s\n", filename, (int)fnlen, shortname);
+	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	STUB();
 }
 
@@ -127,8 +133,10 @@ FMOD_RESULT FMOD_Studio_EventDescription_GetPath(int *eventdescription, char *pa
 	return 0;
 }
 
-FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(int *bank)
+FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 {
+	/* TODO: implement this to preload the samples
+	 * may need to walk through all .ogg files in the bank directory
 	STUB();
 }
 

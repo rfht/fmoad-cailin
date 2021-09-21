@@ -1,6 +1,11 @@
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <json-c/json.h>
+#include <json-c/json_util.h>
+
+#define MAXSTR	1024
 
 typedef enum FMOD_RESULT {
 	FMOD_OK,
