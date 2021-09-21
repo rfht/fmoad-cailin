@@ -1,4 +1,4 @@
-#include "fmodstudio.h"
+#include "fmoad-cailin.h"
 #include "al.h"
 
 FMOD_RESULT FMOD_Studio_System_Create(FMOD_STUDIO_SYSTEM **system, unsigned int headerversion)
@@ -7,13 +7,22 @@ FMOD_RESULT FMOD_Studio_System_Create(FMOD_STUDIO_SYSTEM **system, unsigned int 
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_Initialize()
+FMOD_RESULT FMOD_Studio_System_Initialize(FMOD_STUDIO_SYSTEM *system,
+	int maxchannels, FMOD_STUDIO_INITFLAGS studioflags,
+	FMOD_INITFLAGS flags,
+	void *extradriverdata)
 {
+	// TODO: log/use maxchannels; ignore studioflags, flags , and extradriverdata for now
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_SetListenerAttributes()
+FMOD_RESULT FMOD_Studio_System_SetListenerAttributes(FMOD_STUDIO_SYSTEM *system,
+	int listener,
+	FMOD_3D_ATTRIBUTES *attributes)
 {
+	/* listener: the "listener index"
+	 * attributes: are 3D attributes of the listener
+	 */
 	STUB();
 }
 
@@ -22,8 +31,12 @@ FMOD_RESULT FMOD_Studio_System_Update(int *system)
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_LoadBankFile(int *system, char *filename, int *flags, int **bank)
+FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
+	const char *filename, FMOD_STUDIO_LOAD_BANK_FLAGS flags,
+	FMOD_STUDIO_BANK **bank)
 {
+	// TODO: get filename
+	fprintf(stderr, "filename: %s\n", filename);
 	STUB();
 }
 
@@ -124,8 +137,9 @@ FMOD_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(int *system, int **lowLevelSystem)
+FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(FMOD_STUDIO_SYSTEM *system, FMOD_SYSTEM **lowLevelSystem)
 {
+	// get the low level (FMOD) system object
 	STUB();
 }
 

@@ -87,7 +87,21 @@ typedef enum FMOD_RESULT {
 	FMOD_ERR_TOOMANYSAMPLES
 } FMOD_RESULT;
 
-#define FMOD_STUDIO_SYSTEM int
+#define FMOD_VECTOR			float
+
+typedef struct {
+	FMOD_VECTOR position;
+	FMOD_VECTOR velocity;
+	FMOD_VECTOR forward;
+	FMOD_VECTOR up;
+} FMOD_3D_ATTRIBUTES;
+
+#define FMOD_STUDIO_SYSTEM		int
+#define FMOD_SYSTEM			int
+#define FMOD_STUDIO_INITFLAGS		unsigned int
+#define FMOD_INITFLAGS			unsigned int
+#define FMOD_STUDIO_LOAD_BANK_FLAGS	unsigned int
+#define FMOD_STUDIO_BANK		int	// XXX: may be wrong type
 
 #define STUB() do { \
 	fprintf(stderr, "%s: STUB\n", __func__); \
@@ -123,7 +137,7 @@ FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(int *system, int **lowLevelSyst
 FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(int *system, int listener, int *attributes);
 FMOD_RESULT FMOD_Studio_System_GetVCA(int *system, char *path, int **vca);
 FMOD_RESULT FMOD_Studio_System_Initialize();
-FMOD_RESULT FMOD_Studio_System_LoadBankFile(int *system, char *filename, int *flags, int **bank);
+FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system, const char *filename, FMOD_STUDIO_LOAD_BANK_FLAGS flags, FMOD_STUDIO_BANK **bank);
 FMOD_RESULT FMOD_Studio_System_Release(int *system);
 FMOD_RESULT FMOD_Studio_System_SetListenerAttributes();
 FMOD_RESULT FMOD_Studio_System_Update(int *system);
