@@ -137,7 +137,25 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 {
 	/* TODO: implement this to preload the samples
 	 * may need to walk through all .ogg files in the bank directory
-	STUB();
+	 */
+
+	// TEMPORARY: load sfx.banko only once!
+	if (SFX_LOADED)
+		STUB();
+	// for now just use sfx.banko; later need to get the right bank from FMOD_Studio_System_LoadBankFile
+	char bankpath[] = "/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko";
+	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
+	DIR *d;
+	struct dirent *dir;
+	d = opendir(bankpath);
+	if (d) {
+		while ((dir = readdir(d)) != NULL) {
+			fprintf(stderr, "sample data found: %s\n", dir->d_name);
+		}
+		closedir(d);
+	}
+	SFX_LOADED = 1;
+	return FMOD_OK;
 }
 
 FMOD_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume)

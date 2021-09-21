@@ -5,6 +5,10 @@
 #include <json-c/json.h>
 #include <json-c/json_util.h>
 
+// TEMPORARY VARIABLES FOR TESTING. REMOVE LATER!
+int SFX_LOADED = 0;
+// END OF TEMPORARY VARIABLES
+
 #define MAXSTR	1024
 
 typedef enum FMOD_RESULT {
