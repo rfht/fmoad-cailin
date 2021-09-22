@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <json-c/json.h>
 #include <json-c/json_util.h>
 
@@ -105,19 +106,25 @@ typedef struct {
 	FMOD_VECTOR up;
 } FMOD_3D_ATTRIBUTES;
 
+typedef struct {
+	const char *name;
+	const char *parentdir;
+	const char *fullpath;
+} FMOD_STUDIO_BANK;
+
 #define FMOD_STUDIO_SYSTEM		int
 #define FMOD_SYSTEM			int
 #define FMOD_STUDIO_INITFLAGS		unsigned int
 #define FMOD_INITFLAGS			unsigned int
 #define FMOD_STUDIO_LOAD_BANK_FLAGS	unsigned int
-#define FMOD_STUDIO_BANK		int	// XXX: may be wrong type
+//#define FMOD_STUDIO_BANK		char	// XXX: may be wrong type; I think this needs a struct
 
 #define STUB() do { \
 	fprintf(stderr, "%s: STUB\n", __func__); \
 	return FMOD_OK; \
 } while (0)
 
-FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(int *bank);
+FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank);
 FMOD_RESULT FMOD_Studio_Bus_GetPaused(int *bus, int *paused);
 FMOD_RESULT FMOD_Studio_Bus_SetPaused(int *bus, int paused);
 FMOD_RESULT FMOD_Studio_Bus_StopAllEvents(int *bus, int mode);
