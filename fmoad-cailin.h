@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <err.h>
 #include <libgen.h>
 #include <json-c/json.h>
 #include <json-c/json_util.h>

@@ -43,9 +43,11 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	strlcpy(shortname, filename, sizeof(shortname));
 	fprintf(stderr, "filename: %s, shortname: %s\n", filename, shortname);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
-	FMOD_STUDIO_BANK testbank;
-	FMOD_STUDIO_BANK *p;
+	FMOD_STUDIO_BANK *testbank = malloc(sizeof(FMOD_STUDIO_BANK));
+	if (!testbank)
+		err(1, NULL);
 	// TODO: free() later
+	/*
 	if ((bank = (FMOD_STUDIO_BANK*)malloc(sizeof(FMOD_STUDIO_BANK)))) == NULL)
 		err(1, NULL);
 	*bank = {
@@ -53,7 +55,11 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 		.parentdir = dirname(shortname),
 		.fullpath = filename
 	};
-	*bank = &testbank;
+	*/
+	testbank->name = basename(shortname);
+	testbank->parentdir = dirname(shortname);
+	testbank->fullpath = filename;
+	*bank = testbank;
 	STUB();
 }
 
@@ -107,7 +113,7 @@ FMOD_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance)
 	FILE *f;
 	f = fopen("fmod.log", "a");
 	fprintf(f, "FMOD_Studio_EventInstance_Start: x\n"); //, *eventinstance);
-	playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
+	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
 	return 0;
 }
 
@@ -150,7 +156,7 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 	 * may need to walk through all .ogg files in the bank directory
 	 */
 
-	//fprintf(stderr, "bank name: %s\n", bank->name);
+	fprintf(stderr, "bank name: %s\n", bank->name);
 	// TEMPORARY: load sfx.banko only once!
 	if (SFX_LOADED)
 		STUB();
