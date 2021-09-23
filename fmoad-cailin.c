@@ -43,14 +43,17 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	strlcpy(shortname, filename, sizeof(shortname));
 	fprintf(stderr, "filename: %s, shortname: %s\n", filename, shortname);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
-	FMOD_STUDIO_BANK testbank = {
-		//.name = basename(shortname),
-		.name = "test\0",
+	FMOD_STUDIO_BANK testbank;
+	FMOD_STUDIO_BANK *p;
+	// TODO: free() later
+	if ((bank = (FMOD_STUDIO_BANK*)malloc(sizeof(FMOD_STUDIO_BANK)))) == NULL)
+		err(1, NULL);
+	*bank = {
+		.name = basename(shortname),
 		.parentdir = dirname(shortname),
 		.fullpath = filename
 	};
-	//*bank = &testbank;
-	memcpy(*bank, &testbank, sizeof(**bank));
+	*bank = &testbank;
 	STUB();
 }
 
@@ -147,7 +150,7 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 	 * may need to walk through all .ogg files in the bank directory
 	 */
 
-	fprintf(stderr, "bank name: %s\n", bank->name);
+	//fprintf(stderr, "bank name: %s\n", bank->name);
 	// TEMPORARY: load sfx.banko only once!
 	if (SFX_LOADED)
 		STUB();
