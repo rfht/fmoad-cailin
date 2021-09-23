@@ -28,7 +28,8 @@ FMOD_RESULT FMOD_Studio_System_SetListenerAttributes(FMOD_STUDIO_SYSTEM *system,
 
 FMOD_RESULT FMOD_Studio_System_Update(int *system)
 {
-	STUB();
+	//STUB();
+	return FMOD_OK;
 }
 
 FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
@@ -80,41 +81,37 @@ FMOD_RESULT FMOD_Studio_VCA_GetVolume(int *vca, float *volume, float *finalvolum
 
 FMOD_RESULT FMOD_Studio_System_GetEvent(int *system, char *path, int **event)
 {
-	FILE *f;
-	f = fopen("fmod.log", "a");
-	fprintf(f, "FMOD_Studio_System_GetEvent: %s, event: %p\n", path, (void *) event);
+	fprintf(stderr, "FMOD_Studio_System_GetEvent: %s, event: %p\n", path, (void *) event);
 	// this likely corresponds to: ./Content/FMOD/Desktop/sfx.banko/sfx-char_mad_jump.ogg
 	if (!strncmp(path, "event:/char/madeline/jump", 26)) {
 		*event = (int *) "9";
 	} else {
 		*event = (int *) "0";
 	}
-	return 0;
+	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_EventDescription_LoadSampleData(int *eventdescription)
+FMOD_RESULT FMOD_Studio_EventDescription_LoadSampleData(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription)
 {
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_EventDescription_CreateInstance(int *eventdescription, int **instance)
+FMOD_RESULT FMOD_Studio_EventDescription_CreateInstance(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int **instance)
 {
 	STUB();
 }
 
 
-FMOD_RESULT FMOD_Studio_EventDescription_Is3D(int *eventdescription, int *is3D)
+FMOD_RESULT FMOD_Studio_EventDescription_Is3D(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *is3D)
 {
 	STUB();
 }
 
 FMOD_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance)
 {
-	FILE *f;
-	f = fopen("fmod.log", "a");
-	fprintf(f, "FMOD_Studio_EventInstance_Start: x\n"); //, *eventinstance);
+	fprintf(stderr, "FMOD_Studio_EventInstance_Start: x\n"); //, *eventinstance);
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
-	return 0;
+	STUB();
 }
 
 FMOD_RESULT FMOD_Studio_System_GetBus(int *system, char *path, int **bus)
@@ -132,22 +129,17 @@ FMOD_RESULT FMOD_Studio_Bus_GetPaused(int *bus, int *paused)
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, int **description)
+FMOD_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, FMOD_STUDIO_EVENTDESCRIPTION **description)
 {
-	FILE *f;
-	f = fopen("fmod.log", "a");
-	fprintf(f, "FMOD_Studio_EventInstance_GetDescription: inst x, descr p\n"); //, *eventinstance, (void *) description);
-	return 0;
+	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_EventDescription_GetPath(int *eventdescription, char *path, int size, int *retrieved)
+FMOD_RESULT FMOD_Studio_EventDescription_GetPath(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
 {
-	FILE *f;
-	f = fopen("fmod.log", "a");
-	fprintf(f, "FMOD_Studio_EventDescription_GetPath: %s, %d\n", path, size);
+	fprintf(stderr, "FMOD_Studio_EventDescription_GetPath: %s, %d\n", path, size);
 	path = "event:/env/amb/worldmap\0";	// corresponds to ./Content/FMOD/Desktop/sfx.banko/sfx-env_amb_worldmap.ogg
 	*retrieved = 24;
-	return 0;
+	return FMOD_OK;
 }
 
 FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
@@ -209,10 +201,7 @@ FMOD_RESULT FMOD_Studio_EventInstance_GetVolume(int *eventinstance, float *volum
 
 FMOD_RESULT FMOD_Studio_EventInstance_Stop(int *eventinstance, int mode)
 {
-	FILE *f;
-	f = fopen("fmod.log", "a");
-	fprintf(f, "FMOD_Studio_EventInstance_Stop\n");
-	return 0;
+	STUB();
 }
 
 FMOD_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes)
@@ -230,7 +219,7 @@ FMOD_RESULT FMOD_Studio_EventInstance_SetParameterValue(int *eventinstance, char
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_EventDescription_IsOneshot(int *eventdescription, int *oneshot)
+FMOD_RESULT FMOD_Studio_EventDescription_IsOneshot(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot)
 {
 	STUB();
 }

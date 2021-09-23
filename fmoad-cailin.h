@@ -115,27 +115,32 @@ typedef struct {
 
 #define FMOD_STUDIO_SYSTEM		int
 #define FMOD_SYSTEM			int
+#define FMOD_SOUND			int
 #define FMOD_STUDIO_INITFLAGS		unsigned int
 #define FMOD_INITFLAGS			unsigned int
 #define FMOD_STUDIO_LOAD_BANK_FLAGS	unsigned int
-//#define FMOD_STUDIO_BANK		char	// XXX: may be wrong type; I think this needs a struct
 
 #define STUB() do { \
 	fprintf(stderr, "%s: STUB\n", __func__); \
 	return FMOD_OK; \
 } while (0)
 
+typedef struct {
+	FMOD_STUDIO_SYSTEM *sys;
+	const char *path;
+	FMOD_SOUND **sounds;
+} FMOD_STUDIO_EVENTDESCRIPTION;
+
 FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank);
 FMOD_RESULT FMOD_Studio_Bus_GetPaused(int *bus, int *paused);
 FMOD_RESULT FMOD_Studio_Bus_SetPaused(int *bus, int paused);
 FMOD_RESULT FMOD_Studio_Bus_StopAllEvents(int *bus, int mode);
-FMOD_RESULT FMOD_Studio_EventDescription_CreateInstance(int *eventdescription, int **instance);
-FMOD_RESULT FMOD_Studio_EventDescription_GetPath(int *eventdescription, char *path, int size, int *retrieved);
-FMOD_RESULT FMOD_Studio_EventDescription_Is3D(int *eventdescription, int *is3D);
-FMOD_RESULT FMOD_Studio_EventDescription_IsOneshot(int *eventdescription, int *oneshot);
-FMOD_RESULT FMOD_Studio_EventDescription_LoadSampleData(int *eventdescription);
-FMOD_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes);
-FMOD_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, int **description);
+FMOD_RESULT FMOD_Studio_EventDescription_CreateInstance(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int **instance);
+FMOD_RESULT FMOD_Studio_EventDescription_GetPath(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
+FMOD_RESULT FMOD_Studio_EventDescription_Is3D(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *is3D);
+FMOD_RESULT FMOD_Studio_EventDescription_IsOneshot(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot);
+FMOD_RESULT FMOD_Studio_EventDescription_LoadSampleData(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription); FMOD_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes);
+FMOD_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, FMOD_STUDIO_EVENTDESCRIPTION **description);
 FMOD_RESULT FMOD_Studio_EventInstance_GetPaused(int *eventinstance, int *paused);
 FMOD_RESULT FMOD_Studio_EventInstance_GetPlaybackState(int *eventinstance, int *state);
 FMOD_RESULT FMOD_Studio_EventInstance_GetVolume(int *eventinstance, float *volume, float *finalvolume);
