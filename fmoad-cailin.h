@@ -113,7 +113,13 @@ typedef struct {
 	const char *fullpath;
 } FMOD_STUDIO_BANK;
 
-#define FMOD_STUDIO_SYSTEM		int
+typedef struct {
+	unsigned int maxchannels;
+	unsigned int flags;
+	unsigned int studioflags;
+} FMOD_STUDIO_SYSTEM;
+
+#define FMOD_BOOL			int
 #define FMOD_SYSTEM			int
 #define FMOD_SOUND			int
 #define FMOD_STUDIO_INITFLAGS		unsigned int
@@ -152,16 +158,16 @@ FMOD_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume
 FMOD_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance);
 FMOD_RESULT FMOD_Studio_EventInstance_Stop(int *eventinstance, int mode);
 FMOD_RESULT FMOD_Studio_EventInstance_TriggerCue(int *eventinstance);
-FMOD_RESULT FMOD_Studio_System_Create();
-FMOD_RESULT FMOD_Studio_System_GetBus(int *system, char *path, int **bus);
-FMOD_RESULT FMOD_Studio_System_GetEvent(int *system, char *path, int **event);
-FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(int *system, int **lowLevelSystem);
-FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(int *system, int listener, int *attributes);
-FMOD_RESULT FMOD_Studio_System_GetVCA(int *system, char *path, int **vca);
-FMOD_RESULT FMOD_Studio_System_Initialize();
+FMOD_RESULT FMOD_Studio_System_Create(FMOD_STUDIO_SYSTEM **system, unsigned int headerversion);
+FMOD_RESULT FMOD_Studio_System_GetBus(FMOD_STUDIO_SYSTEM *system, char *path, int **bus);
+FMOD_RESULT FMOD_Studio_System_GetEvent(FMOD_STUDIO_SYSTEM *system, const char *path, FMOD_STUDIO_EVENTDESCRIPTION **event);
+FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(FMOD_STUDIO_SYSTEM *system, int **lowLevelSystem);
+FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(FMOD_STUDIO_SYSTEM *system, int listener, int *attributes);
+FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, char *path, int **vca);
+FMOD_RESULT FMOD_Studio_System_Initialize(FMOD_STUDIO_SYSTEM *system, int maxchannels, FMOD_STUDIO_INITFLAGS studioflags, FMOD_INITFLAGS flags, void *extradriverdata);
 FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system, const char *filename, FMOD_STUDIO_LOAD_BANK_FLAGS flags, FMOD_STUDIO_BANK **bank);
-FMOD_RESULT FMOD_Studio_System_Release(int *system);
-FMOD_RESULT FMOD_Studio_System_SetListenerAttributes();
-FMOD_RESULT FMOD_Studio_System_Update(int *system);
+FMOD_RESULT FMOD_Studio_System_Release(FMOD_STUDIO_SYSTEM *system);
+FMOD_RESULT FMOD_Studio_System_SetListenerAttributes();	// TODO: complete function signature
+FMOD_RESULT FMOD_Studio_System_Update(FMOD_STUDIO_SYSTEM *system);
 FMOD_RESULT FMOD_Studio_VCA_SetVolume(int *vca, float volume);
 FMOD_RESULT FMOD_Studio_VCA_GetVolume(int *vca, float *volume, float *finalvolume);

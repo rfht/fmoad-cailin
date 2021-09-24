@@ -4,6 +4,7 @@
 FMOD_RESULT FMOD_Studio_System_Create(FMOD_STUDIO_SYSTEM **system, unsigned int headerversion)
 {
 	// TODO: create new system object at the address **system; log headerversion
+	fprintf(stderr, "%s headerversion: %d\n", __func__, headerversion);
 	STUB();
 }
 
@@ -13,6 +14,7 @@ FMOD_RESULT FMOD_Studio_System_Initialize(FMOD_STUDIO_SYSTEM *system,
 	void *extradriverdata)
 {
 	// TODO: log/use maxchannels; ignore studioflags, flags , and extradriverdata for now
+	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
 	STUB();
 }
 
@@ -26,7 +28,7 @@ FMOD_RESULT FMOD_Studio_System_SetListenerAttributes(FMOD_STUDIO_SYSTEM *system,
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_Update(int *system)
+FMOD_RESULT FMOD_Studio_System_Update(FMOD_STUDIO_SYSTEM *system)
 {
 	//STUB();
 	return FMOD_OK;
@@ -64,7 +66,7 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetVCA(int *system, char *path, int **vca)
+FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, char *path, int **vca)
 {
 	STUB();
 }
@@ -79,20 +81,15 @@ FMOD_RESULT FMOD_Studio_VCA_GetVolume(int *vca, float *volume, float *finalvolum
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetEvent(int *system, char *path, int **event)
+FMOD_RESULT FMOD_Studio_System_GetEvent(FMOD_STUDIO_SYSTEM *system, const char *path, FMOD_STUDIO_EVENTDESCRIPTION **event)
 {
-	fprintf(stderr, "FMOD_Studio_System_GetEvent: %s, event: %p\n", path, (void *) event);
-	// this likely corresponds to: ./Content/FMOD/Desktop/sfx.banko/sfx-char_mad_jump.ogg
-	if (!strncmp(path, "event:/char/madeline/jump", 26)) {
-		*event = (int *) "9";
-	} else {
-		*event = (int *) "0";
-	}
+	fprintf(stderr, "%s path: %s\n", __func__, path);
 	STUB();
 }
 
 FMOD_RESULT FMOD_Studio_EventDescription_LoadSampleData(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription)
 {
+	// loads all non-streaming sample data used by the event
 	STUB();
 }
 
@@ -102,19 +99,19 @@ FMOD_RESULT FMOD_Studio_EventDescription_CreateInstance(FMOD_STUDIO_EVENTDESCRIP
 }
 
 
-FMOD_RESULT FMOD_Studio_EventDescription_Is3D(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *is3D)
+FMOD_RESULT FMOD_Studio_EventDescription_Is3D(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, FMOD_BOOL *is3D)
 {
+	fprintf(stderr, "%s is3D: %d\n", __func__, *is3D);
 	STUB();
 }
 
 FMOD_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance)
 {
-	fprintf(stderr, "FMOD_Studio_EventInstance_Start: x\n"); //, *eventinstance);
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetBus(int *system, char *path, int **bus)
+FMOD_RESULT FMOD_Studio_System_GetBus(FMOD_STUDIO_SYSTEM *system, char *path, int **bus)
 {
 	STUB();
 }
@@ -179,7 +176,7 @@ FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(FMOD_STUDIO_SYSTEM *system, FMO
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(int *system, int listener, int *attributes)
+FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(FMOD_STUDIO_SYSTEM *system, int listener, int *attributes)
 {
 	STUB();
 }
@@ -209,7 +206,7 @@ FMOD_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *a
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_Release(int *system)
+FMOD_RESULT FMOD_Studio_System_Release(FMOD_STUDIO_SYSTEM *system)
 {
 	STUB();
 }
