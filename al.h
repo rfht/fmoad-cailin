@@ -26,8 +26,20 @@ struct StreamingAudioData
 };
 #endif
 
+typedef struct {
+	const char *fp;		// filepath
+	vorbis_info *vi;
+	char *handle;
+} vorbis_object;
+
+ALuint source;
+ALuint buffers[16];
+
+int al_init(void);
+int al_load (char *eventPath, vorbis_object *out);
+int al_play(vorbis_object *vo);
 void al_check_error(void);
-int playOgg (char *eventPath);
+//int playOgg (char *eventPath);
 size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle);
 int32_t seek_ogg_callback(void* fileHandle, ogg_int64_t to, int32_t type);
 long int tell_ogg_callback(void* fileHandle);

@@ -6,8 +6,6 @@
 
 #include "al.h"
 
-char pcmout[16*1024];
-
 static inline ALenum to_al_format(short channels)
 {
 	if (channels == 1)
@@ -29,11 +27,23 @@ void al_check_error(void)
 	}
 }
 
-int playOgg (char *eventPath)
+int al_init(void)
 {
-   OggVorbis_File vf;
-   int current_section;
-   int eof = 0;
+   alutInit (NULL, NULL);
+   alGenBuffers(16, buffers);
+   alGenSources (1, &source);
+   printf("al_init: rate %ld channels: %d\n",vi->rate, vi->channels);
+}
+
+int al_load (char *eventPath, vorbis_object *out)
+{
+	OggVorbis_File vf;
+	// TODO: free() later
+	char *pcmout = malloc(16*1024*sizeof(char));	// TODO: replace magic number
+	int current_section;
+	int eof = 0;
+
+
    FILE *fp = fopen(eventPath, "rb");
    if(fp == NULL)
    {
@@ -47,20 +57,13 @@ int playOgg (char *eventPath)
       exit(1);
    }
 
-   vorbis_info *vi = ov_info(&vf, -1);
-   printf("rate %ld channels: %d\n",vi->rate, vi->channels);
+   out.vi = ov_info(&vf, -1);
 
-   ALuint source;
-   alutInit (NULL, NULL);
-   ALuint buffers[16];
-   alGenBuffers(16, buffers);
-   alGenSources (1, &source);
-   
    for(int i = 0;i<16;++i)
    {
       long pos = 0;
 
-      while(pos < sizeof(pcmout))
+      while(pos < sizeof(16*1024))	// TODO: replace magic number
       {
 	 long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
 	 pos+=ret;
@@ -71,9 +74,13 @@ int playOgg (char *eventPath)
 	 }
       }
    
-      alBufferData(buffers[i], to_al_format(vi->channels), pcmout, pos, vi->rate);
-   
    }
+	return 0;
+}
+
+int al_play(vorbis_object *vo)
+{
+      alBufferData(buffers[i], to_al_format(vo->vi->channels), vo->handle, pos, vo->vi->rate);
    alSourceQueueBuffers(source, 16, buffers);
    alSourcePlay(source);
    al_check_error();
