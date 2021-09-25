@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,10 +7,6 @@
 #include <libgen.h>
 #include <json-c/json.h>
 #include <json-c/json_util.h>
-
-// TEMPORARY VARIABLES FOR TESTING. REMOVE LATER!
-int SFX_LOADED = 0;
-// END OF TEMPORARY VARIABLES
 
 #define MAXSTR	1024
 
@@ -110,7 +107,8 @@ typedef struct {
 typedef struct {
 	const char *name;
 	const char *parentdir;
-	const char *fullpath;
+	const char *bankpath;
+	const char *dirbank;
 } FMOD_STUDIO_BANK;
 
 typedef struct {
@@ -119,7 +117,7 @@ typedef struct {
 	unsigned int studioflags;
 } FMOD_STUDIO_SYSTEM;
 
-#define FMOD_BOOL			int
+#define FMOD_BOOL			bool
 #define FMOD_SYSTEM			int
 #define FMOD_SOUND			int
 #define FMOD_STUDIO_INITFLAGS		unsigned int
@@ -143,7 +141,7 @@ FMOD_RESULT FMOD_Studio_Bus_SetPaused(int *bus, int paused);
 FMOD_RESULT FMOD_Studio_Bus_StopAllEvents(int *bus, int mode);
 FMOD_RESULT FMOD_Studio_EventDescription_CreateInstance(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int **instance);
 FMOD_RESULT FMOD_Studio_EventDescription_GetPath(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
-FMOD_RESULT FMOD_Studio_EventDescription_Is3D(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *is3D);
+FMOD_RESULT FMOD_Studio_EventDescription_Is3D(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, FMOD_BOOL *is3D);
 FMOD_RESULT FMOD_Studio_EventDescription_IsOneshot(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot);
 FMOD_RESULT FMOD_Studio_EventDescription_LoadSampleData(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription); FMOD_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes);
 FMOD_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, FMOD_STUDIO_EVENTDESCRIPTION **description);

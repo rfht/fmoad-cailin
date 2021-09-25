@@ -39,29 +39,29 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	FMOD_STUDIO_BANK **bank)
 {
 	size_t fnlen;
+	// TODO: free() later
+	//char *db = malloc(1024 * sizeof(char));
+	char *db = reallocarray(NULL, MAXSTR, sizeof(char));
+
 	fnlen = strnlen(filename, MAXSTR);
 	// drop the extension ".bank" which should be on all these filenames
 	size_t dstsize = fnlen - 4;
 	char shortname[dstsize];
 	strlcpy(shortname, filename, sizeof(shortname));
-	fprintf(stderr, "filename: %s, shortname: %s\n", filename, shortname);
+	strlcpy(db, filename, sizeof(db) * MAXSTR);
+	strlcat(db, "o", sizeof(db) * MAXSTR);
+	// TODO: check return values of strlcat(3) and strlcpy(3)
+
+	fprintf(stderr, "filename: %s, shortname: %s, db: %s\n", filename, shortname, db);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	FMOD_STUDIO_BANK *testbank = malloc(sizeof(FMOD_STUDIO_BANK));
 	if (!testbank)
 		err(1, NULL);
 	// TODO: free() later
-	/*
-	if ((bank = (FMOD_STUDIO_BANK*)malloc(sizeof(FMOD_STUDIO_BANK)))) == NULL)
-		err(1, NULL);
-	*bank = {
-		.name = basename(shortname),
-		.parentdir = dirname(shortname),
-		.fullpath = filename
-	};
-	*/
 	testbank->name = basename(shortname);
 	testbank->parentdir = dirname(shortname);
-	testbank->fullpath = filename;
+	testbank->bankpath = filename;
+	testbank->dirbank = db;
 	*bank = testbank;
 	STUB();
 }
@@ -145,23 +145,22 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 	 * may need to walk through all .ogg files in the bank directory
 	 */
 
-	fprintf(stderr, "bank name: %s\n", bank->name);
-	// TEMPORARY: load sfx.banko only once!
-	if (SFX_LOADED)
-		STUB();
-	// for now just use sfx.banko; later need to get the right bank from FMOD_Studio_System_LoadBankFile
-	char bankpath[] = "/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko";
+	fprintf(stderr, "dirbank: %s\n", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
 	DIR *d;
 	struct dirent *dir;
-	d = opendir(bankpath);
+	d = opendir(bank->dirbank);
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
-			//fprintf(stderr, "sample data found: %s\n", dir->d_name);
+			if (dir->d_name[0] != '.')	// filter out '.' and '..'
+			{
+				fprintf(stderr, "sample data found: %s\n", dir->d_name);
+			}
 		}
 		closedir(d);
+	} else {
+		fprintf(stderr, "Error opening dirbank at %s\n", bank->dirbank);
 	}
-	SFX_LOADED = 1;
 	return FMOD_OK;
 }
 
