@@ -41,40 +41,35 @@ int al_load (char *eventPath, vorbis_object *out)
 	// TODO: free() later
 	char *pcmout = malloc(16*1024*sizeof(char));	// TODO: replace magic number
 	int current_section;
-	int eof = 0;
+	//int eof = 0;
 
-
-   FILE *fp = fopen(eventPath, "rb");
-   if(fp == NULL)
-   {
-      fprintf(stderr, "could not open file %s\n", eventPath);
-      exit(1);
-   }
-
-   if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_DEFAULT)<0)
-   {
-      fprintf(stderr, "input does not appear to be in an ogg bitstream\n");
-      exit(1);
-   }
-
-   out.vi = ov_info(&vf, -1);
-
-   for(int i = 0;i<16;++i)
-   {
-      long pos = 0;
-
-      while(pos < sizeof(16*1024))	// TODO: replace magic number
-      {
-	 long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
-	 pos+=ret;
-	 if(ret == 0)
-	 {
-	    eof = 1;
-	    break;
-	 }
-      }
-   
-   }
+	FILE *fp = fopen(eventPath, "rb");
+	if(fp == NULL)
+	{
+		fprintf(stderr, "could not open file %s\n", eventPath);
+		exit(1);
+	}
+	if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_DEFAULT)<0)
+	{
+		fprintf(stderr, "input does not appear to be in an ogg bitstream\n");
+		exit(1);
+	}
+	out.vi = ov_info(&vf, -1);
+	for(int i = 0;i<16;++i)
+	{
+		long pos = 0;
+		while(pos < sizeof(16*1024))	// TODO: replace magic number
+		{
+			long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
+			pos+=ret;
+			if(ret == 0)
+			{
+				//eof = 1;
+				break;
+			}
+		}
+	}
+	fclose(fp);
 	return 0;
 }
 
