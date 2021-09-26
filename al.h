@@ -36,7 +36,7 @@ ALuint source;
 ALuint buffers[16];
 
 int al_init(void);
-int al_load (char *eventPath, vorbis_object *out);
+vorbis_object *al_load (char *filepath);
 int al_play(vorbis_object *vo);
 void al_check_error(void);
 //int playOgg (char *eventPath);

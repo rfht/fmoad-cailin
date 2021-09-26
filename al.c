@@ -29,24 +29,25 @@ void al_check_error(void)
 
 int al_init(void)
 {
-   alutInit (NULL, NULL);
-   alGenBuffers(16, buffers);
-   alGenSources (1, &source);
-   printf("al_init: rate %ld channels: %d\n",vi->rate, vi->channels);
+	alutInit (NULL, NULL);
+	alGenBuffers(16, buffers);
+	alGenSources (1, &source);
+	return 0;
 }
 
-int al_load (char *eventPath, vorbis_object *out)
+vorbis_object *al_load (char *filepath)
 {
 	OggVorbis_File vf;
+	vorbis_object out;
 	// TODO: free() later
 	char *pcmout = malloc(16*1024*sizeof(char));	// TODO: replace magic number
 	int current_section;
 	//int eof = 0;
 
-	FILE *fp = fopen(eventPath, "rb");
+	FILE *fp = fopen(filepath, "rb");
 	if(fp == NULL)
 	{
-		fprintf(stderr, "could not open file %s\n", eventPath);
+		fprintf(stderr, "could not open file %s\n", filepath);
 		exit(1);
 	}
 	if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_DEFAULT)<0)
@@ -55,7 +56,7 @@ int al_load (char *eventPath, vorbis_object *out)
 		exit(1);
 	}
 	out.vi = ov_info(&vf, -1);
-	for(int i = 0;i<16;++i)
+	for(int i = 0;i<16;++i)	// TODO: replace magic number
 	{
 		long pos = 0;
 		while(pos < sizeof(16*1024))	// TODO: replace magic number
@@ -75,37 +76,43 @@ int al_load (char *eventPath, vorbis_object *out)
 
 int al_play(vorbis_object *vo)
 {
-      alBufferData(buffers[i], to_al_format(vo->vi->channels), vo->handle, pos, vo->vi->rate);
-   alSourceQueueBuffers(source, 16, buffers);
-   alSourcePlay(source);
-   al_check_error();
-   while(!eof)
-   {
-      ALuint released[16];
-      ALint count;
-      alGetSourcei(source, AL_BUFFERS_PROCESSED, &count);
-      alSourceUnqueueBuffers(source, count, released);
-    
-      for(int i = 0;i<count;++i)
-      {
-	 long pos = 0;
-	 while(pos < sizeof(pcmout))
-	 {
-	    long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
-	    pos+=ret;
-	    if(ret == 0)
-	    {
-	       eof = 1;
-	       break;
-	    }
-	 }
-	 alBufferData(released[i], to_al_format(vi->channels), pcmout, pos, vi->rate);
-      }
-      alSourceQueueBuffers(source, count, released);
-      alutSleep(1/20.);
-   }
-   alutExit ();
-   return EXIT_SUCCESS;
+	//long pos = 0;
+	char *pcmout = malloc(16*1024*sizeof(char));	// TODO: replace magic number
+	int eof = 0;
+	int current_section;
+
+	for (int i = 0; i < 16; i++)
+		alBufferData(buffers[i], to_al_format(vo->vi->channels), vo->handle, pos, vo->vi->rate);
+	alSourceQueueBuffers(source, 16, buffers);
+	alSourcePlay(source);
+	al_check_error();
+	while(!eof)
+	{
+		ALuint released[16];
+		ALint count;
+		alGetSourcei(source, AL_BUFFERS_PROCESSED, &count);
+		alSourceUnqueueBuffers(source, count, released);
+		
+		for(int i = 0;i<count;++i)
+		{
+			long pos = 0;
+			while(pos < sizeof(pcmout))
+			{
+				long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
+				pos+=ret;
+				if(ret == 0)
+				{
+					eof = 1;
+					break;
+				}
+			}
+			alBufferData(released[i], to_al_format(vo->vi->channels), pcmout, pos, vo->vi->rate);
+		}
+		alSourceQueueBuffers(source, count, released);
+		alutSleep(1/20.);
+	}
+	alutExit ();
+	return EXIT_SUCCESS;
 }
 
 // functions borrowed from C++ (https://indiegamedev.net/2020/01/16/how-to-stream-ogg-files-with-openal-in-c/) disabled for now
