@@ -6,6 +6,9 @@
 
 #include "al.h"
 
+ALuint al_source;
+ALuint al_buffer;
+
 static inline ALenum to_al_format(short channels)
 {
 	if (channels == 1)
@@ -30,75 +33,72 @@ void al_check_error(void)
 int al_init(void)
 {
 	alutInit (NULL, NULL);
-	alGenBuffers(16, buffers);
-	alGenSources (1, &source);
+	alGenBuffers(1, &al_buffer);
+	alGenSources (1, &al_source);
 	return 0;
 }
 
 vorbis_object *al_load (char *filepath)
 {
 	OggVorbis_File vf;
-	vorbis_object out;
-	// TODO: free() later
-	char *pcmout = malloc(16*1024*sizeof(char));	// TODO: replace magic number
 	int current_section;
-	//int eof = 0;
-
+	vorbis_object *out = (vorbis_object *)malloc(sizeof(vorbis_object));;
+	// TODO: free() later
 	FILE *fp = fopen(filepath, "rb");
 	if(fp == NULL)
 	{
 		fprintf(stderr, "could not open file %s\n", filepath);
 		exit(1);
 	}
-	if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_DEFAULT)<0)
+	if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE)<0)
 	{
 		fprintf(stderr, "input does not appear to be in an ogg bitstream\n");
 		exit(1);
 	}
-	out.vi = ov_info(&vf, -1);
-	for(int i = 0;i<16;++i)	// TODO: replace magic number
+	out->fp = filepath;
+	out->vi = ov_info(&vf, -1);
+	out->size = ov_pcm_total(&vf, -1) * out->vi->channels * 2; // 2 for 16 bit
+	fprintf(stderr, "rate %ld channels: %d bytes: %ld\n", out->vi->rate, out->vi->channels, (long)out->size);
+	char *pcmout = malloc(out->size);	// TODO: replace magic number
+	long pos = 0;
+	
+	while(pos < out->size)
 	{
-		long pos = 0;
-		while(pos < sizeof(16*1024))	// TODO: replace magic number
+		long ret = ov_read(&vf, pcmout+pos, 4096, 0, 2, 1, &current_section);
+		pos+=ret;
+		if(ret == 0)
 		{
-			long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
-			pos+=ret;
-			if(ret == 0)
-			{
-				//eof = 1;
-				break;
-			}
+			break;
 		}
 	}
+	out->handle = pcmout;
 	fclose(fp);
-	return 0;
+	return out;
 }
 
 int al_play(vorbis_object *vo)
 {
-	//long pos = 0;
-	char *pcmout = malloc(16*1024*sizeof(char));	// TODO: replace magic number
-	int eof = 0;
-	int current_section;
-
-	for (int i = 0; i < 16; i++)
-		alBufferData(buffers[i], to_al_format(vo->vi->channels), vo->handle, pos, vo->vi->rate);
-	alSourceQueueBuffers(source, 16, buffers);
-	alSourcePlay(source);
+	alBufferData(al_buffer, to_al_format(vo->vi->channels), vo->handle, vo->size, vo->vi->rate);
 	al_check_error();
+	alSourceQueueBuffers(al_source, 1, &al_buffer);
+	al_check_error();
+	alSourcePlay(al_source);
+	al_check_error();
+	/*
+	int eof = 0;
 	while(!eof)
 	{
 		ALuint released[16];
 		ALint count;
-		alGetSourcei(source, AL_BUFFERS_PROCESSED, &count);
-		alSourceUnqueueBuffers(source, count, released);
+		alGetSourcei(al_source, AL_BUFFERS_PROCESSED, &count);
+		alSourceUnqueueBuffers(al_source, count, released);
 		
 		for(int i = 0;i<count;++i)
 		{
 			long pos = 0;
-			while(pos < sizeof(pcmout))
+			while(pos < vo->bytes)
 			{
-				long ret = ov_read(&vf, pcmout+pos, sizeof(pcmout)-pos, 0, 2, 1, &current_section);
+				long ret = ov_read(&memfile, vo->handle+pos, sizeof(vo->handle)-pos, 0, 2, 1, &current_section);
 				pos+=ret;
 				if(ret == 0)
 				{
@@ -108,10 +108,11 @@ int al_play(vorbis_object *vo)
 			}
 			alBufferData(released[i], to_al_format(vo->vi->channels), pcmout, pos, vo->vi->rate);
 		}
-		alSourceQueueBuffers(source, count, released);
+		alSourceQueueBuffers(al_source, count, released);
 		alutSleep(1/20.);
 	}
-	alutExit ();
+	*/
+//	alutExit ();
 	return EXIT_SUCCESS;
 }
 

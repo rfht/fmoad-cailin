@@ -15,6 +15,13 @@ FMOD_RESULT FMOD_Studio_System_Initialize(FMOD_STUDIO_SYSTEM *system,
 {
 	// TODO: log/use maxchannels; ignore studioflags, flags , and extradriverdata for now
 	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
+
+	// TEST SOUND
+	al_init();
+	vorbis_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
+	
+	fprintf(stderr, "test_sound size: %ld\n", (long)test_sound->size);
+	al_play(test_sound);
 	STUB();
 }
 
@@ -212,7 +219,8 @@ FMOD_RESULT FMOD_Studio_System_Release(FMOD_STUDIO_SYSTEM *system)
 
 FMOD_RESULT FMOD_Studio_EventInstance_SetParameterValue(int *eventinstance, char *name, float value)
 {
-	STUB();
+	//STUB();
+	return FMOD_OK;
 }
 
 FMOD_RESULT FMOD_Studio_EventDescription_IsOneshot(FMOD_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot)

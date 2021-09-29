@@ -30,10 +30,8 @@ typedef struct {
 	const char *fp;		// filepath
 	vorbis_info *vi;
 	char *handle;
+	size_t size;
 } vorbis_object;
-
-ALuint source;
-ALuint buffers[16];
 
 int al_init(void);
 vorbis_object *al_load (char *filepath);
