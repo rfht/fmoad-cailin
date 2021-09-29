@@ -58,6 +58,7 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	BANK **bank)
 {
 	size_t fnlen;
+	char jo_path[MAXSTR];
 	// TODO: free() later
 	char *db = reallocarray(NULL, MAXSTR, sizeof(char));
 
@@ -67,16 +68,37 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	strlcpy(shortname, filename, sizeof(shortname));
 	strlcpy(db, filename, sizeof(db) * MAXSTR); // TODO: check return val
 	strlcat(db, "o", sizeof(db) * MAXSTR); // TODO: check return val
-	DPRINT(2, "filename: %s, shortname: %s, db: %s", filename, shortname, db);
+	strlcpy(jo_path, shortname, MAXSTR);
+	strlcat(jo_path, ".json", MAXSTR);
+	DPRINT(2, "filename: %s, shortname: %s, db: %s, jo_path: %s", filename, shortname, db, jo_path);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	BANK *newbank = malloc(sizeof(BANK));
 	if (!newbank)
 		err(1, NULL);
 	// TODO: free() later
+
+	json_object *jo = json_object_from_file(jo_path);
+
 	newbank->name = basename(shortname);
 	newbank->parentdir = dirname(shortname);
 	newbank->bankpath = filename;
 	newbank->dirbank = db;
+	newbank->jo = jo;	// the json_object structure
+
+	// TEST for newbank->jo
+	json_object *test = json_object_object_get(newbank->jo, "events");	// TODO: replace with json_object_object_get_ex()
+	size_t n_test = json_object_array_length(test);
+	DPRINT(1, "n_test: %zu", n_test);
+	json_object *test_obj;
+	for (int i = 0; i < n_test; i++)
+	{
+		test_obj = json_object_array_get_idx(test, i);
+		if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
+		{
+			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(test_obj));
+		}
+	}
+
 	*bank = newbank;
 	return FM_OK;
 }
@@ -102,6 +124,30 @@ FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
 {
 	DPRINT(1, "path: %s", path);
+	/*
+	 * example: event:/env/amb/worldmap
+	 *
+	 * in file Content/FMOD/Desktop/sfx.json
+	 * search for "path": "event:/env/amb/worldmap"
+	 * in this object, query for "files":[]"filename"
+	 * this will get "env_amb_worldmap"
+	 */
+
+	/*
+	json_object *test = json_object_object_get(newbank->jo, "events");
+	size_t n_test = json_object_array_length(test);
+	DPRINT(1, "n_test: %zu", n_test);
+	json_object *test_obj;
+	for (int i = 0; i < n_test; i++)
+	{
+		test_obj = json_object_array_get_idx(test, i);
+		if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
+		{
+			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(test_obj));
+		}
+	}
+	*/
+
 	STUB();
 }
 

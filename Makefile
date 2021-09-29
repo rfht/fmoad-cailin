@@ -1,6 +1,6 @@
 CC =		cc
 CFLAGS =	-c -fPIC -std=c99 -Wall -Werror -O0 -g -I/usr/local/include
-LDFLAGS =	-shared -L/usr/local/lib -lopenal -lvorbisfile -lalut
+LDFLAGS =	-shared -L/usr/local/lib -lopenal -lvorbisfile -lalut -ljson-c
 RM =		rm -f
 TARGET_LIB =	libfmodstudio.so
 SRCS =		fmoad-cailin.c al.c

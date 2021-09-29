@@ -6,7 +6,6 @@
 #include <err.h>
 #include <libgen.h>
 #include <json-c/json.h>
-#include <json-c/json_util.h>
 
 #define PROJ	"FMOAD-CAILIN"	// project name
 #define MAXSTR	1024
@@ -133,6 +132,7 @@ typedef struct {
 	const char *parentdir;
 	const char *bankpath;
 	const char *dirbank;
+	json_object *jo;
 } BANK;
 
 typedef struct {
