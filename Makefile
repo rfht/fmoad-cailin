@@ -1,5 +1,5 @@
 CC =		cc
-CFLAGS =	-c -fPIC -Wall -Werror -O0 -g -I/usr/local/include
+CFLAGS =	-c -fPIC -std=c99 -Wall -Werror -O0 -g -I/usr/local/include
 LDFLAGS =	-shared -L/usr/local/lib -lopenal -lvorbisfile -lalut
 RM =		rm -f
 TARGET_LIB =	libfmodstudio.so
