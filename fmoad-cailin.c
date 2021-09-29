@@ -8,18 +8,18 @@ FM_RESULT FMOD_Studio_System_Create(FM_STUDIO_SYSTEM **system, unsigned int head
 	if (!init_done)
 	{
 		char *log_env;
-		fprintf(stderr, "initializing fmoad-cailin\n");
+		fprintf(stderr, "[%s] initializing OpenAL backend\n", PROJ);
 		al_init();
 		if ((log_env = getenv("FMOAD_LOGLEVEL")) != NULL)
 		{
 			loglevel = (unsigned int)atoi(log_env);
 		}
-		fprintf(stderr, "fmoad-cailin loglevel: %d\n", loglevel);
+		fprintf(stderr, "[%s] FMOAD_LOGLEVEL=%d\n", PROJ, loglevel);
 		init_done = 1;
 	}
 	// TODO: create new system object at the address **system
-	fprintf(stderr, "%s headerversion: %d\n", __func__, headerversion);
-	STUB();
+	DPRINT(2, "headerversion %d\n", headerversion);
+	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_System_Initialize(FM_STUDIO_SYSTEM *system,
@@ -31,10 +31,9 @@ FM_RESULT FMOD_Studio_System_Initialize(FM_STUDIO_SYSTEM *system,
 	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
 	// TEST SOUND
 	vorbis_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
-	
 	fprintf(stderr, "test_sound size: %ld\n", (long)test_sound->size);
 	al_play(test_sound);
-	STUB();
+	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_System_SetListenerAttributes(FM_STUDIO_SYSTEM *system,
@@ -44,15 +43,13 @@ FM_RESULT FMOD_Studio_System_SetListenerAttributes(FM_STUDIO_SYSTEM *system,
 	/* listener: the "listener index"
 	 * attributes: are 3D attributes of the listener
 	 */
-	fprintf(stderr, "%s: listener %d\n", __func__, listener);
-	//STUB();
+	DPRINT(2, "listener %d", listener);
 	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_System_Update(FM_STUDIO_SYSTEM *system)
 {
-	// stay quiet; this one is called a lot
-	//STUB();
+	DPRINT(3, "STUB"); // stay quiet; this one is called a lot
 	return FM_OK;
 }
 
@@ -70,29 +67,29 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(FM_STUDIO_SYSTEM *system,
 	strlcpy(shortname, filename, sizeof(shortname));
 	strlcpy(db, filename, sizeof(db) * MAXSTR); // TODO: check return val
 	strlcat(db, "o", sizeof(db) * MAXSTR); // TODO: check return val
-	fprintf(stderr, "filename: %s, shortname: %s, db: %s\n", filename, shortname, db);
+	DPRINT(1, "filename: %s, shortname: %s, db: %s\n", filename, shortname, db);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
-	FM_STUDIO_BANK *testbank = malloc(sizeof(FM_STUDIO_BANK)); // TODO: rename var
-	if (!testbank)
+	FM_STUDIO_BANK *newbank = malloc(sizeof(FM_STUDIO_BANK));
+	if (!newbank)
 		err(1, NULL);
 	// TODO: free() later
-	testbank->name = basename(shortname);
-	testbank->parentdir = dirname(shortname);
-	testbank->bankpath = filename;
-	testbank->dirbank = db;
-	*bank = testbank;
-	STUB();
+	newbank->name = basename(shortname);
+	newbank->parentdir = dirname(shortname);
+	newbank->bankpath = filename;
+	newbank->dirbank = db;
+	*bank = newbank;
+	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_System_GetVCA(FM_STUDIO_SYSTEM *system, char *path, FM_STUDIO_VCA **vca)
 {
-	fprintf(stderr, "%s path: %s\n", __func__, path);
+	DPRINT(2, "path: %s", path);
 	STUB();
 }
 
 FM_RESULT FMOD_Studio_VCA_SetVolume(FM_STUDIO_VCA *vca, float volume)
 {
-	fprintf(stderr, "%s volume: %.2f\n", __func__, volume);
+	DPRINT(1, "volume: %f", volume);
 	// TODO: store the volume for the VCA
 	STUB();
 }
@@ -104,7 +101,7 @@ FM_RESULT FMOD_Studio_VCA_GetVolume(FM_STUDIO_VCA *vca, float *volume, float *fi
 
 FM_RESULT FMOD_Studio_System_GetEvent(FM_STUDIO_SYSTEM *system, const char *path, FM_STUDIO_EVENTDESCRIPTION **event)
 {
-	fprintf(stderr, "%s path: %s\n", __func__, path);
+	DPRINT(1, "path: %s", path);
 	STUB();
 }
 
@@ -120,9 +117,9 @@ FM_RESULT FMOD_Studio_EventDescription_CreateInstance(FM_STUDIO_EVENTDESCRIPTION
 }
 
 
-FM_RESULT FMOD_Studio_EventDescription_Is3D(FM_STUDIO_EVENTDESCRIPTION *eventdescription, FM_BOOL *is3D)
+FM_RESULT FMOD_Studio_EventDescription_Is3D(FM_STUDIO_EVENTDESCRIPTION *eventdescription, bool *is3D)
 {
-	fprintf(stderr, "%s is3D: %d\n", __func__, *is3D);
+	DPRINT(2, "is3D %d", *is3D);
 	STUB();
 }
 
@@ -134,17 +131,17 @@ FM_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance)
 
 FM_RESULT FMOD_Studio_System_GetBus(FM_STUDIO_SYSTEM *system, char *path, FM_STUDIO_BUS **bus)
 {
-	fprintf(stderr, "%s path: %s\n", __func__, path);
+	DPRINT(1, "path %s", path);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_SetPaused(FM_STUDIO_BUS *bus, FM_BOOL paused)
+FM_RESULT FMOD_Studio_Bus_SetPaused(FM_STUDIO_BUS *bus, bool paused)
 {
-	fprintf(stderr, "%s paused: %d\n", __func__, (int)paused);
+	DPRINT(1, "paused %d", (int)paused);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_GetPaused(FM_STUDIO_BUS *bus, FM_BOOL *paused)
+FM_RESULT FMOD_Studio_Bus_GetPaused(FM_STUDIO_BUS *bus, bool *paused)
 {
 	STUB();
 }
@@ -156,24 +153,25 @@ FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, FM_STUDIO
 
 FM_RESULT FMOD_Studio_EventDescription_GetPath(FM_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
 {
-	fprintf(stderr, "%s path: %s, size: %d\n", __func__, path, size);
 	path = "event:/env/amb/worldmap\0";	// corresponds to ./Content/FMOD/Desktop/sfx.banko/sfx-env_amb_worldmap.ogg
-	*retrieved = 24;
+	*retrieved = strnlen(path, size) + 1;	// +1 to account for terminating null character
+	DPRINT(1, "path %s, buffer size %d, retrieved %d", path, size, *retrieved);
 	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_Bank_LoadSampleData(FM_STUDIO_BANK *bank)
 {
 	fprintf(stderr, "dirbank: %s\n", bank->dirbank);
+	DPRINT(2, "dirbank: %s", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
 	DIR *d;
 	struct dirent *dir;
 	d = opendir(bank->dirbank);
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
-			if (dir->d_name[0] != '.')	// filter out '.' and '..'
+			if (dir->d_name[0] != '.')	// filter out '.' and '..' and hidden files '.*'
 			{
-				//fprintf(stderr, "loading sample data from %s\n", dir->d_name);
+				DPRINT(2, "sample %s\n", dir->d_name);
 				// TODO: implement loading the sample into memory
 			}
 		}
@@ -181,7 +179,7 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(FM_STUDIO_BANK *bank)
 	} else {
 		fprintf(stderr, "Error opening dirbank at %s\n", bank->dirbank);
 	}
-	STUB();
+	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume)
@@ -232,7 +230,7 @@ FM_RESULT FMOD_Studio_System_Release(FM_STUDIO_SYSTEM *system)
 
 FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(int *eventinstance, char *name, float value)
 {
-	//STUB();
+	DPRINT(2, "STUB");	// this one is called a lot
 	return FM_OK;
 }
 

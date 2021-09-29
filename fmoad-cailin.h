@@ -8,9 +8,9 @@
 #include <json-c/json.h>
 #include <json-c/json_util.h>
 
+#define PROJ	"FMOAD-CAILIN"	// project name
 #define MAXSTR	1024
 
-#define FM_BOOL			bool
 #define FM_SYSTEM			int
 #define FM_SOUND			int
 #define FM_STUDIO_INITFLAGS		unsigned int
@@ -22,14 +22,14 @@ static unsigned int loglevel = 0;
 
 #define DPRINT(threshold, ...) do { \
 	if (threshold <= loglevel) { \
-		fprintf(stderr, "[FMOAD-CAILIN] %s: ", __func__); \
+		fprintf(stderr, "[%s] %s: ", PROJ, __func__); \
 		fprintf(stderr, __VA_ARGS__); \
 		fprintf(stderr, "\n"); \
 	} \
 } while (0)
 
 #define STUB() do { \
-	DPRINT(1, "STUB"); \
+	DPRINT(2, "STUB"); \
 	return FM_OK; \
 } while (0)
 
@@ -148,7 +148,7 @@ typedef struct {
 
 typedef struct {
 	const char *path;
-	FM_BOOL paused;
+	bool paused;
 } FM_STUDIO_BUS;
 
 typedef struct {
@@ -158,12 +158,12 @@ typedef struct {
 } FM_STUDIO_EVENTDESCRIPTION;
 
 FM_RESULT FMOD_Studio_Bank_LoadSampleData(FM_STUDIO_BANK *bank);
-FM_RESULT FMOD_Studio_Bus_GetPaused(FM_STUDIO_BUS *bus, FM_BOOL *paused);
-FM_RESULT FMOD_Studio_Bus_SetPaused(FM_STUDIO_BUS *bus, FM_BOOL paused);
+FM_RESULT FMOD_Studio_Bus_GetPaused(FM_STUDIO_BUS *bus, bool *paused);
+FM_RESULT FMOD_Studio_Bus_SetPaused(FM_STUDIO_BUS *bus, bool paused);
 FM_RESULT FMOD_Studio_Bus_StopAllEvents(FM_STUDIO_BUS *bus, int mode);
 FM_RESULT FMOD_Studio_EventDescription_CreateInstance(FM_STUDIO_EVENTDESCRIPTION *eventdescription, int **instance);
 FM_RESULT FMOD_Studio_EventDescription_GetPath(FM_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
-FM_RESULT FMOD_Studio_EventDescription_Is3D(FM_STUDIO_EVENTDESCRIPTION *eventdescription, FM_BOOL *is3D);
+FM_RESULT FMOD_Studio_EventDescription_Is3D(FM_STUDIO_EVENTDESCRIPTION *eventdescription, bool *is3D);
 FM_RESULT FMOD_Studio_EventDescription_IsOneshot(FM_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot);
 FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(FM_STUDIO_EVENTDESCRIPTION *eventdescription);
 FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes);
