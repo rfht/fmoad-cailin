@@ -117,6 +117,12 @@ typedef struct {
 	unsigned int studioflags;
 } FMOD_STUDIO_SYSTEM;
 
+typedef struct {
+	const char *path;
+	float volume;
+	float finalvolume;
+} FMOD_STUDIO_VCA;
+
 #define FMOD_BOOL			bool
 #define FMOD_SYSTEM			int
 #define FMOD_SOUND			int
@@ -161,11 +167,11 @@ FMOD_RESULT FMOD_Studio_System_GetBus(FMOD_STUDIO_SYSTEM *system, char *path, in
 FMOD_RESULT FMOD_Studio_System_GetEvent(FMOD_STUDIO_SYSTEM *system, const char *path, FMOD_STUDIO_EVENTDESCRIPTION **event);
 FMOD_RESULT FMOD_Studio_System_GetLowLevelSystem(FMOD_STUDIO_SYSTEM *system, int **lowLevelSystem);
 FMOD_RESULT FMOD_Studio_System_GetListenerAttributes(FMOD_STUDIO_SYSTEM *system, int listener, int *attributes);
-FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, char *path, int **vca);
+FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, char *path, FMOD_STUDIO_VCA **vca);
 FMOD_RESULT FMOD_Studio_System_Initialize(FMOD_STUDIO_SYSTEM *system, int maxchannels, FMOD_STUDIO_INITFLAGS studioflags, FMOD_INITFLAGS flags, void *extradriverdata);
 FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system, const char *filename, FMOD_STUDIO_LOAD_BANK_FLAGS flags, FMOD_STUDIO_BANK **bank);
 FMOD_RESULT FMOD_Studio_System_Release(FMOD_STUDIO_SYSTEM *system);
 FMOD_RESULT FMOD_Studio_System_SetListenerAttributes();	// TODO: complete function signature
 FMOD_RESULT FMOD_Studio_System_Update(FMOD_STUDIO_SYSTEM *system);
-FMOD_RESULT FMOD_Studio_VCA_SetVolume(int *vca, float volume);
-FMOD_RESULT FMOD_Studio_VCA_GetVolume(int *vca, float *volume, float *finalvolume);
+FMOD_RESULT FMOD_Studio_VCA_SetVolume(FMOD_STUDIO_VCA *vca, float volume);
+FMOD_RESULT FMOD_Studio_VCA_GetVolume(FMOD_STUDIO_VCA *vca, float *volume, float *finalvolume);

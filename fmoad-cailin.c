@@ -13,11 +13,10 @@ FMOD_RESULT FMOD_Studio_System_Initialize(FMOD_STUDIO_SYSTEM *system,
 	FMOD_INITFLAGS flags,
 	void *extradriverdata)
 {
-	// TODO: log/use maxchannels; ignore studioflags, flags , and extradriverdata for now
+	// ignoring studioflags, flags , and extradriverdata for now
 	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
-
-	// TEST SOUND
 	al_init();
+	// TEST SOUND
 	vorbis_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
 	
 	fprintf(stderr, "test_sound size: %ld\n", (long)test_sound->size);
@@ -32,11 +31,14 @@ FMOD_RESULT FMOD_Studio_System_SetListenerAttributes(FMOD_STUDIO_SYSTEM *system,
 	/* listener: the "listener index"
 	 * attributes: are 3D attributes of the listener
 	 */
-	STUB();
+	fprintf(stderr, "%s: listener %d\n", __func__, listener);
+	//STUB();
+	return FMOD_OK;
 }
 
 FMOD_RESULT FMOD_Studio_System_Update(FMOD_STUDIO_SYSTEM *system)
 {
+	// stay quiet; this one is called a lot
 	//STUB();
 	return FMOD_OK;
 }
@@ -47,21 +49,17 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 {
 	size_t fnlen;
 	// TODO: free() later
-	//char *db = malloc(1024 * sizeof(char));
 	char *db = reallocarray(NULL, MAXSTR, sizeof(char));
 
 	fnlen = strnlen(filename, MAXSTR);
-	// drop the extension ".bank" which should be on all these filenames
-	size_t dstsize = fnlen - 4;
+	size_t dstsize = fnlen - 4; // drop ".bank" extension
 	char shortname[dstsize];
 	strlcpy(shortname, filename, sizeof(shortname));
-	strlcpy(db, filename, sizeof(db) * MAXSTR);
-	strlcat(db, "o", sizeof(db) * MAXSTR);
-	// TODO: check return values of strlcat(3) and strlcpy(3)
-
+	strlcpy(db, filename, sizeof(db) * MAXSTR); // TODO: check return val
+	strlcat(db, "o", sizeof(db) * MAXSTR); // TODO: check return val
 	fprintf(stderr, "filename: %s, shortname: %s, db: %s\n", filename, shortname, db);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
-	FMOD_STUDIO_BANK *testbank = malloc(sizeof(FMOD_STUDIO_BANK));
+	FMOD_STUDIO_BANK *testbank = malloc(sizeof(FMOD_STUDIO_BANK)); // TODO: rename var
 	if (!testbank)
 		err(1, NULL);
 	// TODO: free() later
@@ -73,17 +71,20 @@ FMOD_RESULT FMOD_Studio_System_LoadBankFile(FMOD_STUDIO_SYSTEM *system,
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, char *path, int **vca)
+FMOD_RESULT FMOD_Studio_System_GetVCA(FMOD_STUDIO_SYSTEM *system, char *path, FMOD_STUDIO_VCA **vca)
 {
+	fprintf(stderr, "%s path: %s\n", __func__, path);
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_VCA_SetVolume(int *vca, float volume)
+FMOD_RESULT FMOD_Studio_VCA_SetVolume(FMOD_STUDIO_VCA *vca, float volume)
 {
+	fprintf(stderr, "%s volume: %.2f\n", __func__, volume);
+	// TODO: store the volume for the VCA
 	STUB();
 }
 
-FMOD_RESULT FMOD_Studio_VCA_GetVolume(int *vca, float *volume, float *finalvolume)
+FMOD_RESULT FMOD_Studio_VCA_GetVolume(FMOD_STUDIO_VCA *vca, float *volume, float *finalvolume)
 {
 	STUB();
 }
@@ -148,10 +149,6 @@ FMOD_RESULT FMOD_Studio_EventDescription_GetPath(FMOD_STUDIO_EVENTDESCRIPTION *e
 
 FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 {
-	/* TODO: implement this to preload the samples
-	 * may need to walk through all .ogg files in the bank directory
-	 */
-
 	fprintf(stderr, "dirbank: %s\n", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
 	DIR *d;
@@ -161,14 +158,15 @@ FMOD_RESULT FMOD_Studio_Bank_LoadSampleData(FMOD_STUDIO_BANK *bank)
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.')	// filter out '.' and '..'
 			{
-				fprintf(stderr, "sample data found: %s\n", dir->d_name);
+				//fprintf(stderr, "loading sample data from %s\n", dir->d_name);
+				// TODO: implement loading the sample into memory
 			}
 		}
 		closedir(d);
 	} else {
 		fprintf(stderr, "Error opening dirbank at %s\n", bank->dirbank);
 	}
-	return FMOD_OK;
+	STUB();
 }
 
 FMOD_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume)
