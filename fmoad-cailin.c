@@ -1,7 +1,7 @@
 #include "fmoad-cailin.h"
 #include "al.h"
 
-FM_RESULT FMOD_Studio_System_Create(FM_STUDIO_SYSTEM **system, unsigned int headerversion)
+FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 {
 	/* TODO: FMOD_Studio_System_Create is the first function called by Celeste.
 	 *	unclear if that is always the case. */
@@ -22,7 +22,7 @@ FM_RESULT FMOD_Studio_System_Create(FM_STUDIO_SYSTEM **system, unsigned int head
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_System_Initialize(FM_STUDIO_SYSTEM *system,
+FM_RESULT FMOD_Studio_System_Initialize(SYSTEM *system,
 	int maxchannels, FM_STUDIO_INITFLAGS studioflags,
 	FM_INITFLAGS flags,
 	void *extradriverdata)
@@ -36,7 +36,7 @@ FM_RESULT FMOD_Studio_System_Initialize(FM_STUDIO_SYSTEM *system,
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_System_SetListenerAttributes(FM_STUDIO_SYSTEM *system,
+FM_RESULT FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 	int listener,
 	FM_3D_ATTRIBUTES *attributes)
 {
@@ -47,15 +47,15 @@ FM_RESULT FMOD_Studio_System_SetListenerAttributes(FM_STUDIO_SYSTEM *system,
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_System_Update(FM_STUDIO_SYSTEM *system)
+FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
 {
 	DPRINT(3, "STUB"); // stay quiet; this one is called a lot
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_System_LoadBankFile(FM_STUDIO_SYSTEM *system,
+FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	const char *filename, FM_STUDIO_LOAD_BANK_FLAGS flags,
-	FM_STUDIO_BANK **bank)
+	BANK **bank)
 {
 	size_t fnlen;
 	// TODO: free() later
@@ -67,9 +67,9 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(FM_STUDIO_SYSTEM *system,
 	strlcpy(shortname, filename, sizeof(shortname));
 	strlcpy(db, filename, sizeof(db) * MAXSTR); // TODO: check return val
 	strlcat(db, "o", sizeof(db) * MAXSTR); // TODO: check return val
-	DPRINT(1, "filename: %s, shortname: %s, db: %s\n", filename, shortname, db);
+	DPRINT(2, "filename: %s, shortname: %s, db: %s", filename, shortname, db);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
-	FM_STUDIO_BANK *newbank = malloc(sizeof(FM_STUDIO_BANK));
+	BANK *newbank = malloc(sizeof(BANK));
 	if (!newbank)
 		err(1, NULL);
 	// TODO: free() later
@@ -81,43 +81,43 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(FM_STUDIO_SYSTEM *system,
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_System_GetVCA(FM_STUDIO_SYSTEM *system, char *path, FM_STUDIO_VCA **vca)
+FM_RESULT FMOD_Studio_System_GetVCA(SYSTEM *system, char *path, VCA **vca)
 {
 	DPRINT(2, "path: %s", path);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_VCA_SetVolume(FM_STUDIO_VCA *vca, float volume)
+FM_RESULT FMOD_Studio_VCA_SetVolume(VCA *vca, float volume)
 {
 	DPRINT(1, "volume: %f", volume);
 	// TODO: store the volume for the VCA
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_VCA_GetVolume(FM_STUDIO_VCA *vca, float *volume, float *finalvolume)
+FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetEvent(FM_STUDIO_SYSTEM *system, const char *path, FM_STUDIO_EVENTDESCRIPTION **event)
+FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
 {
 	DPRINT(1, "path: %s", path);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(FM_STUDIO_EVENTDESCRIPTION *eventdescription)
+FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription)
 {
 	// loads all non-streaming sample data used by the event
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventDescription_CreateInstance(FM_STUDIO_EVENTDESCRIPTION *eventdescription, int **instance)
+FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, int **instance)
 {
 	STUB();
 }
 
 
-FM_RESULT FMOD_Studio_EventDescription_Is3D(FM_STUDIO_EVENTDESCRIPTION *eventdescription, bool *is3D)
+FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D)
 {
 	DPRINT(2, "is3D %d", *is3D);
 	STUB();
@@ -129,29 +129,29 @@ FM_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance)
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetBus(FM_STUDIO_SYSTEM *system, char *path, FM_STUDIO_BUS **bus)
+FM_RESULT FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus)
 {
 	DPRINT(1, "path %s", path);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_SetPaused(FM_STUDIO_BUS *bus, bool paused)
+FM_RESULT FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused)
 {
 	DPRINT(1, "paused %d", (int)paused);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_GetPaused(FM_STUDIO_BUS *bus, bool *paused)
+FM_RESULT FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, FM_STUDIO_EVENTDESCRIPTION **description)
+FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, EVENTDESCRIPTION **description)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventDescription_GetPath(FM_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
+FM_RESULT FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
 {
 	path = "event:/env/amb/worldmap\0";	// corresponds to ./Content/FMOD/Desktop/sfx.banko/sfx-env_amb_worldmap.ogg
 	*retrieved = strnlen(path, size) + 1;	// +1 to account for terminating null character
@@ -159,9 +159,8 @@ FM_RESULT FMOD_Studio_EventDescription_GetPath(FM_STUDIO_EVENTDESCRIPTION *event
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_Bank_LoadSampleData(FM_STUDIO_BANK *bank)
+FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 {
-	fprintf(stderr, "dirbank: %s\n", bank->dirbank);
 	DPRINT(2, "dirbank: %s", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
 	DIR *d;
@@ -187,13 +186,13 @@ FM_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume)
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetLowLevelSystem(FM_STUDIO_SYSTEM *system, FM_SYSTEM **lowLevelSystem)
+FM_RESULT FMOD_Studio_System_GetLowLevelSystem(SYSTEM *system, FM_SYSTEM **lowLevelSystem)
 {
 	// get the low level (FMOD) system object
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetListenerAttributes(FM_STUDIO_SYSTEM *system, int listener, int *attributes)
+FM_RESULT FMOD_Studio_System_GetListenerAttributes(SYSTEM *system, int listener, int *attributes)
 {
 	STUB();
 }
@@ -223,18 +222,18 @@ FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *att
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_Release(FM_STUDIO_SYSTEM *system)
+FM_RESULT FMOD_Studio_System_Release(SYSTEM *system)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(int *eventinstance, char *name, float value)
+FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(FM_STUDIO_EVENTINSTANCE *eventinstance, char *name, float value)
 {
-	DPRINT(2, "STUB");	// this one is called a lot
+	DPRINT(2, "name: %s, value: %.2f", name, value);
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_EventDescription_IsOneshot(FM_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot)
+FM_RESULT FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, int *oneshot)
 {
 	STUB();
 }
@@ -249,7 +248,7 @@ FM_RESULT FMOD_Studio_EventInstance_TriggerCue(int *eventinstance)
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_StopAllEvents(FM_STUDIO_BUS *bus, int mode)
+FM_RESULT FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode)
 {
 	STUB();
 }

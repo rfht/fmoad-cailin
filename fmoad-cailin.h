@@ -11,11 +11,12 @@
 #define PROJ	"FMOAD-CAILIN"	// project name
 #define MAXSTR	1024
 
-#define FM_SYSTEM			int
-#define FM_SOUND			int
-#define FM_STUDIO_INITFLAGS		unsigned int
 #define FM_INITFLAGS			unsigned int
+#define FM_SOUND			int
+#define FM_STUDIO_EVENTINSTANCE		int
+#define FM_STUDIO_INITFLAGS		unsigned int
 #define FM_STUDIO_LOAD_BANK_FLAGS	unsigned int
+#define FM_SYSTEM			int
 
 static bool init_done = false;
 static unsigned int loglevel = 0;
@@ -132,42 +133,42 @@ typedef struct {
 	const char *parentdir;
 	const char *bankpath;
 	const char *dirbank;
-} FM_STUDIO_BANK;
+} BANK;
 
 typedef struct {
 	unsigned int maxchannels;
 	unsigned int flags;
 	unsigned int studioflags;
-} FM_STUDIO_SYSTEM;
+} SYSTEM;
 
 typedef struct {
 	const char *path;
 	float volume;
 	float finalvolume;
-} FM_STUDIO_VCA;
+} VCA;
 
 typedef struct {
 	const char *path;
 	bool paused;
-} FM_STUDIO_BUS;
+} BUS;
 
 typedef struct {
-	FM_STUDIO_SYSTEM *sys;
+	SYSTEM *sys;
 	const char *path;
 	FM_SOUND **sounds;
-} FM_STUDIO_EVENTDESCRIPTION;
+} EVENTDESCRIPTION;
 
-FM_RESULT FMOD_Studio_Bank_LoadSampleData(FM_STUDIO_BANK *bank);
-FM_RESULT FMOD_Studio_Bus_GetPaused(FM_STUDIO_BUS *bus, bool *paused);
-FM_RESULT FMOD_Studio_Bus_SetPaused(FM_STUDIO_BUS *bus, bool paused);
-FM_RESULT FMOD_Studio_Bus_StopAllEvents(FM_STUDIO_BUS *bus, int mode);
-FM_RESULT FMOD_Studio_EventDescription_CreateInstance(FM_STUDIO_EVENTDESCRIPTION *eventdescription, int **instance);
-FM_RESULT FMOD_Studio_EventDescription_GetPath(FM_STUDIO_EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
-FM_RESULT FMOD_Studio_EventDescription_Is3D(FM_STUDIO_EVENTDESCRIPTION *eventdescription, bool *is3D);
-FM_RESULT FMOD_Studio_EventDescription_IsOneshot(FM_STUDIO_EVENTDESCRIPTION *eventdescription, int *oneshot);
-FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(FM_STUDIO_EVENTDESCRIPTION *eventdescription);
+FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank);
+FM_RESULT FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused);
+FM_RESULT FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused);
+FM_RESULT FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode);
+FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, int **instance);
+FM_RESULT FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
+FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D);
+FM_RESULT FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, int *oneshot);
+FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription);
 FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes);
-FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, FM_STUDIO_EVENTDESCRIPTION **description);
+FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, EVENTDESCRIPTION **description);
 FM_RESULT FMOD_Studio_EventInstance_GetPaused(int *eventinstance, int *paused);
 FM_RESULT FMOD_Studio_EventInstance_GetPlaybackState(int *eventinstance, int *state);
 FM_RESULT FMOD_Studio_EventInstance_GetVolume(int *eventinstance, float *volume, float *finalvolume);
@@ -179,16 +180,16 @@ FM_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume);
 FM_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance);
 FM_RESULT FMOD_Studio_EventInstance_Stop(int *eventinstance, int mode);
 FM_RESULT FMOD_Studio_EventInstance_TriggerCue(int *eventinstance);
-FM_RESULT FMOD_Studio_System_Create(FM_STUDIO_SYSTEM **system, unsigned int headerversion);
-FM_RESULT FMOD_Studio_System_GetBus(FM_STUDIO_SYSTEM *system, char *path, FM_STUDIO_BUS **bus);
-FM_RESULT FMOD_Studio_System_GetEvent(FM_STUDIO_SYSTEM *system, const char *path, FM_STUDIO_EVENTDESCRIPTION **event);
-FM_RESULT FMOD_Studio_System_GetLowLevelSystem(FM_STUDIO_SYSTEM *system, int **lowLevelSystem);
-FM_RESULT FMOD_Studio_System_GetListenerAttributes(FM_STUDIO_SYSTEM *system, int listener, int *attributes);
-FM_RESULT FMOD_Studio_System_GetVCA(FM_STUDIO_SYSTEM *system, char *path, FM_STUDIO_VCA **vca);
-FM_RESULT FMOD_Studio_System_Initialize(FM_STUDIO_SYSTEM *system, int maxchannels, FM_STUDIO_INITFLAGS studioflags, FM_INITFLAGS flags, void *extradriverdata);
-FM_RESULT FMOD_Studio_System_LoadBankFile(FM_STUDIO_SYSTEM *system, const char *filename, FM_STUDIO_LOAD_BANK_FLAGS flags, FM_STUDIO_BANK **bank);
-FM_RESULT FMOD_Studio_System_Release(FM_STUDIO_SYSTEM *system);
+FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion);
+FM_RESULT FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus);
+FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event);
+FM_RESULT FMOD_Studio_System_GetLowLevelSystem(SYSTEM *system, int **lowLevelSystem);
+FM_RESULT FMOD_Studio_System_GetListenerAttributes(SYSTEM *system, int listener, int *attributes);
+FM_RESULT FMOD_Studio_System_GetVCA(SYSTEM *system, char *path, VCA **vca);
+FM_RESULT FMOD_Studio_System_Initialize(SYSTEM *system, int maxchannels, FM_STUDIO_INITFLAGS studioflags, FM_INITFLAGS flags, void *extradriverdata);
+FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system, const char *filename, FM_STUDIO_LOAD_BANK_FLAGS flags, BANK **bank);
+FM_RESULT FMOD_Studio_System_Release(SYSTEM *system);
 FM_RESULT FMOD_Studio_System_SetListenerAttributes();	// TODO: complete function signature
-FM_RESULT FMOD_Studio_System_Update(FM_STUDIO_SYSTEM *system);
-FM_RESULT FMOD_Studio_VCA_SetVolume(FM_STUDIO_VCA *vca, float volume);
-FM_RESULT FMOD_Studio_VCA_GetVolume(FM_STUDIO_VCA *vca, float *volume, float *finalvolume);
+FM_RESULT FMOD_Studio_System_Update(SYSTEM *system);
+FM_RESULT FMOD_Studio_VCA_SetVolume(VCA *vca, float volume);
+FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume);
