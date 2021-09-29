@@ -13,7 +13,7 @@
 
 #define FM_INITFLAGS			unsigned int
 #define FM_SOUND			int
-#define FM_STUDIO_EVENTINSTANCE		int
+#define EVENTINSTANCE			int
 #define FM_STUDIO_INITFLAGS		unsigned int
 #define FM_STUDIO_LOAD_BANK_FLAGS	unsigned int
 #define FM_SYSTEM			int
@@ -167,19 +167,19 @@ FM_RESULT FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescriptio
 FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D);
 FM_RESULT FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, int *oneshot);
 FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription);
-FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes);
-FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, EVENTDESCRIPTION **description);
-FM_RESULT FMOD_Studio_EventInstance_GetPaused(int *eventinstance, int *paused);
-FM_RESULT FMOD_Studio_EventInstance_GetPlaybackState(int *eventinstance, int *state);
-FM_RESULT FMOD_Studio_EventInstance_GetVolume(int *eventinstance, float *volume, float *finalvolume);
-FM_RESULT FMOD_Studio_EventInstance_Release(int *eventinstance);
-FM_RESULT FMOD_Studio_EventInstance_Set3DAttributes(int *eventinstance, int *attributes);
-FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(int *eventinstance, char *name, float value);
-FM_RESULT FMOD_Studio_EventInstance_SetPaused(int *eventinstance, int paused);
-FM_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume);
-FM_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance);
-FM_RESULT FMOD_Studio_EventInstance_Stop(int *eventinstance, int mode);
-FM_RESULT FMOD_Studio_EventInstance_TriggerCue(int *eventinstance);
+FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(EVENTINSTANCE *eventinstance, int *attributes);
+FM_RESULT FMOD_Studio_EventInstance_GetDescription(EVENTINSTANCE *eventinstance, EVENTDESCRIPTION **description);
+FM_RESULT FMOD_Studio_EventInstance_GetPaused(EVENTINSTANCE *eventinstance, int *paused);
+FM_RESULT FMOD_Studio_EventInstance_GetPlaybackState(EVENTINSTANCE *eventinstance, int *state);
+FM_RESULT FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *volume, float *finalvolume);
+FM_RESULT FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance);
+FM_RESULT FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int *attributes);
+FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, char *name, float value);
+FM_RESULT FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused);
+FM_RESULT FMOD_Studio_EventInstance_SetVolume(EVENTINSTANCE *eventinstance, float volume);
+FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance);
+FM_RESULT FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, int mode);
+FM_RESULT FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance);
 FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion);
 FM_RESULT FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus);
 FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event);

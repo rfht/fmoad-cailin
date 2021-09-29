@@ -123,7 +123,7 @@ FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, 
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Start(int *eventinstance)
+FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
 	STUB();
@@ -146,7 +146,7 @@ FM_RESULT FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetDescription(int *eventinstance, EVENTDESCRIPTION **description)
+FM_RESULT FMOD_Studio_EventInstance_GetDescription(EVENTINSTANCE *eventinstance, EVENTDESCRIPTION **description)
 {
 	STUB();
 }
@@ -181,7 +181,7 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	return FM_OK;
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetVolume(int *eventinstance, float volume)
+FM_RESULT FMOD_Studio_EventInstance_SetVolume(EVENTINSTANCE *eventinstance, float volume)
 {
 	STUB();
 }
@@ -197,27 +197,27 @@ FM_RESULT FMOD_Studio_System_GetListenerAttributes(SYSTEM *system, int listener,
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Set3DAttributes(int *eventinstance, int *attributes)
+FM_RESULT FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Release(int *eventinstance)
+FM_RESULT FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetVolume(int *eventinstance, float *volume, float *finalvolume)
+FM_RESULT FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *volume, float *finalvolume)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Stop(int *eventinstance, int mode)
+FM_RESULT FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, int mode)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(int *eventinstance, int *attributes)
+FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
 {
 	STUB();
 }
@@ -227,7 +227,7 @@ FM_RESULT FMOD_Studio_System_Release(SYSTEM *system)
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(FM_STUDIO_EVENTINSTANCE *eventinstance, char *name, float value)
+FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, char *name, float value)
 {
 	DPRINT(2, "name: %s, value: %.2f", name, value);
 	return FM_OK;
@@ -238,12 +238,12 @@ FM_RESULT FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescript
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetPaused(int *eventinstance, int paused)
+FM_RESULT FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_TriggerCue(int *eventinstance)
+FM_RESULT FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance)
 {
 	STUB();
 }
@@ -253,12 +253,16 @@ FM_RESULT FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode)
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetPaused(int *eventinstance, int *paused)
+FM_RESULT FMOD_Studio_EventInstance_GetPaused(EVENTINSTANCE *eventinstance, int *paused)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetPlaybackState(int *eventinstance, int *state)
+FM_RESULT FMOD_Studio_EventInstance_GetPlaybackState(EVENTINSTANCE *eventinstance, int *state)
 {
 	STUB();
 }
+
+/* Missing API:
+ * FMOD_Studio_EventInstance_GetParameterValue()
+ */
