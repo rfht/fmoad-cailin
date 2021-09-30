@@ -12,7 +12,7 @@ const char **get_event_paths(BANK *bank)
 		event = json_object_array_get_idx(events, i);
 		//if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
 		ret[i] = json_object_get_string(json_object_object_get(event, "path"));
-		DPRINT(1, "%d: %s\n", i+1, ret[i]);
+		DPRINT(1, "%d: %s", i+1, ret[i]);
 	}
 	return ret;
 }
@@ -21,13 +21,15 @@ const char **get_vca_paths(BANK *bank)
 {
 	json_object *vcas = json_object_object_get(bank->jo, "VCAs");	// TODO: replace with json_object_object_get_ex()
 	size_t n_vcas = json_object_array_length(vcas);
+	const char** ret = NULL;
 	json_object *vca;
 	for (int i = 0; i < n_vcas; i++)
 	{
 		vca = json_object_array_get_idx(vcas, i);
-		DPRINT(1, "%d: %s\n", i+1, json_object_get_string(json_object_object_get(vca, "path")));
+		ret[i] = json_object_get_string(json_object_object_get(vca, "path"));
+		DPRINT(1, "%d: %s", i+1, ret[i]);
 	}
-	return NULL;
+	return ret;
 }
 
 FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
