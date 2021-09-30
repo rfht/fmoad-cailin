@@ -8,6 +8,9 @@
 #include <vorbis/vorbisfile.h>
 
 #define MAXSOUNDS	65536
+#define NUM_BUFFERS	16
+#define BUFFER_SIZE	65536
+#define NUM_SOURCES	16
 
 // disable until reviewed
 #if 0
@@ -41,9 +44,15 @@ typedef struct {
 static sound_object sounds[MAXSOUNDS];
 static unsigned int sound_counter = 0;
 
+static ALuint al_buffers[NUM_BUFFERS];
+static ALuint al_sources[NUM_SOURCES];
+
+static int current_buffer;
+static int current_source;
+
 int al_init(void);
 sound_object *al_load (char *filepath);
-int al_play(sound_object *vo);
+int al_play(sound_object *so);
 void al_check_error(void);
 //int playOgg (char *eventPath);
 size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle);

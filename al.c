@@ -6,9 +6,6 @@
 
 #include "al.h"
 
-ALuint al_source;
-ALuint al_buffer;
-
 static inline ALenum to_al_format(short channels)
 {
 	if (channels == 1)
@@ -33,8 +30,8 @@ void al_check_error(void)
 int al_init(void)
 {
 	alutInit (NULL, NULL);
-	alGenBuffers(1, &al_buffer);
-	alGenSources (1, &al_source);
+	alGenBuffers(NUM_BUFFERS, al_buffers);
+	alGenSources (NUM_SOURCES, al_sources);
 	return 0;
 }
 
@@ -76,29 +73,34 @@ sound_object *al_load (char *filepath)
 	return out;
 }
 
-int al_play(sound_object *vo)
+int al_play(sound_object *so)
 {
-	alBufferData(al_buffer, to_al_format(vo->vi->channels), vo->handle, vo->size, vo->vi->rate);
+	alBufferData(al_buffers[current_buffer], to_al_format(so->vi->channels), so->handle, so->size, so->vi->rate);
 	al_check_error();
-	alSourceQueueBuffers(al_source, 1, &al_buffer);
+	alSourceQueueBuffers(al_sources[current_source], 1, &al_buffers[current_buffer]);
 	al_check_error();
-	alSourcePlay(al_source);
+	alSourcePlay(al_sources[current_source]);
 	al_check_error();
+	current_buffer++;
+	if (++current_buffer >= NUM_BUFFERS)
+		current_buffer = 0;
+	if (++current_source >= NUM_SOURCES)
+		current_source = 0;
 	/*
 	int eof = 0;
 	while(!eof)
 	{
 		ALuint released[16];
 		ALint count;
-		alGetSourcei(al_source, AL_BUFFERS_PROCESSED, &count);
-		alSourceUnqueueBuffers(al_source, count, released);
+		alGetSourcei(al_sources, AL_BUFFERS_PROCESSED, &count);
+		alSourceUnqueueBuffers(al_sources, count, released);
 		
 		for(int i = 0;i<count;++i)
 		{
 			long pos = 0;
-			while(pos < vo->bytes)
+			while(pos < so->bytes)
 			{
-				long ret = ov_read(&memfile, vo->handle+pos, sizeof(vo->handle)-pos, 0, 2, 1, &current_section);
+				long ret = ov_read(&memfile, so->handle+pos, sizeof(so->handle)-pos, 0, 2, 1, &current_section);
 				pos+=ret;
 				if(ret == 0)
 				{
@@ -106,9 +108,9 @@ int al_play(sound_object *vo)
 					break;
 				}
 			}
-			alBufferData(released[i], to_al_format(vo->vi->channels), pcmout, pos, vo->vi->rate);
+			alBufferData(released[i], to_al_format(so->vi->channels), pcmout, pos, so->vi->rate);
 		}
-		alSourceQueueBuffers(al_source, count, released);
+		alSourceQueueBuffers(al_sources, count, released);
 		alutSleep(1/20.);
 	}
 	*/

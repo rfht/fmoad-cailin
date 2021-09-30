@@ -92,6 +92,26 @@ FM_RESULT FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 
 FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
 {
+	/*
+	ALint al_state;
+	alGetSourcei(al_sources[0], AL_SOURCE_STATE, &al_state);
+	switch(al_state) {
+		case AL_INITIAL:
+			DPRINT(1, "al_state: AL_INITIAL");
+			break;
+		case AL_PLAYING:
+			DPRINT(1, "al_state: AL_PLAYING");
+			break;
+		case AL_PAUSED:
+			DPRINT(1, "al_state: AL_PAUSED");
+			break;
+		case AL_STOPPED:
+			DPRINT(1, "al_state: AL_STOPPED");
+			break;
+		default:
+			DPRINT(1, "al_state: Unrecognized state!");
+	}
+	*/
 	DPRINT(3, "STUB"); // stay quiet; this one is called a lot
 	return FM_OK;
 }
@@ -183,23 +203,8 @@ FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDES
 	newevent->path = path;
 	newevent->sound_idx = get_sound_idx((char *)path);	// returns -1 if error;
 	DPRINT(1, "path: %s, idx: %d", newevent->path, newevent->sound_idx);
-
-	/*
-	json_object *test = json_object_object_get(newbank->jo, "events");
-	size_t n_test = json_object_array_length(test);
-	DPRINT(1, "n_test: %zu", n_test);
-	json_object *test_obj;
-	for (int i = 0; i < n_test; i++)
-	{
-		test_obj = json_object_array_get_idx(test, i);
-		if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
-		{
-			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(test_obj));
-		}
-	}
-	*/
-
-	STUB();
+	*event = newevent;
+	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription)
@@ -208,9 +213,12 @@ FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdes
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, int **instance)
+FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance)
 {
-	STUB();
+	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
+	newinstance->evd = eventdescription;
+	*instance = newinstance;
+	return FM_OK;
 }
 
 
@@ -223,7 +231,11 @@ FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, 
 FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
-	STUB();
+	DPRINT(3, "sound_idx: %d", eventinstance->evd->sound_idx);
+	DPRINT(3, "sound object path: %s", sounds[eventinstance->evd->sound_idx].path);
+	al_play(&sounds[eventinstance->evd->sound_idx]);
+	// TODO: check return value
+	return FM_OK;
 }
 
 FM_RESULT FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus)

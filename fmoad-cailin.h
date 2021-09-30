@@ -12,7 +12,6 @@
 
 #define FM_INITFLAGS			unsigned int
 #define FM_SOUND			int
-#define EVENTINSTANCE			int
 #define FM_STUDIO_INITFLAGS		unsigned int
 #define FM_STUDIO_LOAD_BANK_FLAGS	unsigned int
 #define FM_SYSTEM			int
@@ -159,11 +158,15 @@ typedef struct {
 	int sound_idx;		// index of the sound_object in the sounds array
 } EVENTDESCRIPTION;
 
+typedef struct {
+	EVENTDESCRIPTION *evd;
+} EVENTINSTANCE;
+
 FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank);
 FM_RESULT FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused);
 FM_RESULT FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused);
 FM_RESULT FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode);
-FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, int **instance);
+FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance);
 FM_RESULT FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
 FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D);
 FM_RESULT FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, int *oneshot);
