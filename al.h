@@ -32,13 +32,13 @@ struct StreamingAudioData
 };
 #endif
 
-// from openal-soft's alstream.c example
+// based on openal-soft's alstream.c example
 typedef struct StreamPlayer {
 	ALuint buffers[NUM_BUFFERS];
 	ALuint source;
 
-	SNDFILE *sndfile;
-	SF_INFO sfinfo;
+	OggVorbis_File ov_file;
+	vorbis_info ov_info;
 	short *membuf;
 
 	/* The format of the output stream (sample rate is in sfinfo) */
@@ -79,5 +79,7 @@ static void DeletePlayer(StreamPlayer *player);
 static void ClosePlayer(StreamPlayer *player);
 static int StartPlayer(StreamPlayer *player);
 static int UpdatePlayer(StreamPlayer *player);
+static int OpenPlayerFile(StreamPlayer *player, const char *filename);
+static void ClosePlayerFile(StreamPlayer *player);
 
 #endif // AL_H
