@@ -6,12 +6,14 @@
 
 #include "al.h"
 
+/*
 static inline ALenum to_al_format(short channels)
 {
 	if (channels == 1)
 		return AL_FORMAT_MONO16;
 	else return AL_FORMAT_STEREO16;
 }
+*/
 
 void al_check_error(void)
 {
@@ -36,46 +38,9 @@ int al_init(void)
 	return 0;
 }
 
-SoundObject *al_load (char *filepath)
-{
-	OggVorbis_File vf;
-	int current_section;
-	SoundObject *out = (SoundObject *)malloc(sizeof(SoundObject));;
-	// TODO: free() later
-	FILE *fp = fopen(filepath, "rb");
-	if(fp == NULL)
-	{
-		fprintf(stderr, "could not open file %s\n", filepath);
-		exit(1);
-	}
-	if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE)<0)
-	{
-		fprintf(stderr, "input does not appear to be in an ogg bitstream\n");
-		exit(1);
-	}
-	out->fp = filepath;
-	out->vi = ov_info(&vf, -1);
-	out->size = ov_pcm_total(&vf, -1) * out->vi->channels * 2; // 2 for 16 bit
-	fprintf(stderr, "rate %ld channels: %d bytes: %ld\n", out->vi->rate, out->vi->channels, (long)out->size);
-	char *pcmout = malloc(out->size);	// TODO: replace magic number
-	long pos = 0;
-	
-	while(pos < out->size)
-	{
-		long ret = ov_read(&vf, pcmout+pos, 4096, 0, 2, 1, &current_section);
-		pos+=ret;
-		if(ret == 0)
-		{
-			break;
-		}
-	}
-	out->handle = pcmout;
-	fclose(fp);
-	return out;
-}
-
 int al_play(SoundObject *so)
 {
+	/*
 	alBufferData(al_buffers[current_buffer], to_al_format(so->vi->channels), so->handle, so->size, so->vi->rate);
 	al_check_error();
 	alSourceQueueBuffers(al_sources[current_source], 1, &al_buffers[current_buffer]);
@@ -87,6 +52,7 @@ int al_play(SoundObject *so)
 		current_buffer = 0;
 	if (++current_source >= NUM_SOURCES)
 		current_source = 0;
+	*/
 	/*
 	int eof = 0;
 	while(!eof)
@@ -120,7 +86,7 @@ int al_play(SoundObject *so)
 }
 
 // from openal-soft's alstream.c example
-static StreamPlayer *NewPlayer(void)
+StreamPlayer *NewPlayer(void)
 {
 	StreamPlayer *player;
 	player = malloc(sizeof(*player));
@@ -128,7 +94,7 @@ static StreamPlayer *NewPlayer(void)
 	alGenBuffers(NUM_BUFFERS, player->buffers);
 	assert(alGetError() == AL_NO_ERROR && "Could not create buffers");
 	alGenSources(1, &player->source);
-	asser(alGetError() == AL_NO_ERROR && "Coud not create source");
+	assert(alGetError() == AL_NO_ERROR && "Could not create source");
 
 	/* Set parameters so mono sources play out the front-center speaker and
 	 * won't distance attenuate. */
@@ -141,20 +107,21 @@ static StreamPlayer *NewPlayer(void)
 }
 
 // from openal-soft's alstream.c example
-static void DeletePlayer(StreamPlayer *player)
+void DeletePlayer(StreamPlayer *player)
 {
 	alDeleteSources(1, &player->source);
 	alDeleteBuffers(NUM_BUFFERS, player->buffers);
 	if(alGetError() != AL_NO_ERROR)
 		fprintf(stderr, "Failed to delete object IDs\n");
-	memset(play, 0, sizeof(*player));
+	memset(player, 0, sizeof(*player));
 	free(player);
 }
 
 // from openal-soft's alstream.c example
-static int StartPlayer(StreamPlayer *player)
+int StartPlayer(StreamPlayer *player)
 {
 	ALsizei i;
+	int current_section;
 
 	/* Rewind the source position and clear the buffer queue */
 	alSourceRewind(player->source);
@@ -164,12 +131,14 @@ static int StartPlayer(StreamPlayer *player)
 	for(i = 0;i < NUM_BUFFERS;i++)
 	{
 		/* Get some data to give it to the buffer */
-		sf_count_t slen = sf_readf_short(player->sndfile, player->membuf, BUFFER_SAMPLES);
-		if(slen < 1) break;
+		//long slen = sf_readf_short(player->ov_file, player->membuf, BUFFER_SAMPLES);
+		// TODO: third parameter (4096) (int length) should be length of the buffer in bytes
+		long ov_len = ov_read(player->ov_file, player->membuf, BUFFER_SAMPLES, 0, 2, 1, &current_section);
+		if(ov_len < 1) break;
 
-		slen *= player->sfinfo.channels * (sf_count_t)sizeof(short);
-		alBufferData(player->buffers[i], player->format, player->membuf, (ALsizei)slen,
-			player->sfinfo.samplerate);
+		ov_len *= player->ov_info.channels * (long)sizeof(short);
+		alBufferData(player->buffers[i], player->format, player->membuf, (ALsizei)ov_len,
+			player->ov_info.rate);
 	}
 	if(alGetError() != AL_NO_ERROR)
 	{
@@ -189,9 +158,10 @@ static int StartPlayer(StreamPlayer *player)
 	return 1;
 }
 
-static int UpdatePlayer(StreamPlayer *player)
+int UpdatePlayer(StreamPlayer *player)
 {
 	ALint processed, state;
+	int current_section;
 
 	/* Get relevant source info */
 	alGetSourcei(player->source, AL_SOURCE_STATE, &state);
@@ -206,19 +176,20 @@ static int UpdatePlayer(StreamPlayer *player)
 	while(processed > 0)
 	{
 		ALuint bufid;
-		sf_count_t slen;
+		long ov_len;
 
 		alSourceUnqueueBuffers(player->source, 1, &bufid);
 		processed--;
 
 		/* Read the next chunk of data, refill the buffer, and queue it
 		 * back on the source */
-		slen = sf_readf_short(player->sndfile, player->membuf, BUFFER_SAMPLES);
-		if(slen > 0)
+		//ov_len = sf_readf_short(player->ov_file, player->membuf, BUFFER_SAMPLES);
+		ov_len = ov_read(player->ov_file, player->membuf, BUFFER_SAMPLES, 0, 2, 1, &current_section);
+		if(ov_len > 0)
 		{
-			slen *= player->sfinfo.channels * (sf_count_t)sizeof(short);
-			alBufferData(bufid, player->format, player->membuf, (ALsizei)slen,
-				player->sfinfo.samplerate);
+			ov_len *= player->ov_info.channels * (long)sizeof(short);
+			alBufferData(bufid, player->format, player->membuf, (ALsizei)ov_len,
+				player->ov_info.rate);
 			alSourceQueueBuffers(player->source, 1, &bufid);
 		}
 		if(alGetError() != AL_NO_ERROR)
@@ -251,61 +222,60 @@ static int UpdatePlayer(StreamPlayer *player)
 
 /* Opens the first audio stream of the named file. If a file is already open,
  * it will be closed first. */
-static int OpenPlayerFile(StreamPlayer *player, const char *filename)
+int OpenPlayerFile(StreamPlayer *player, const char *filename)
 {
 	size_t frame_size;
 
 	ClosePlayerFile(player);
 
 	/* Open the audio file and check that it's usable. */
-	player->fp = fopen(filepath, "r");
-	if(ov_open_callbacks(player->fp, &player->ov_file, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0)
+	player->fp = fopen(filename, "r");
+	if(ov_open_callbacks(player->fp, player->ov_file, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0)
 	{
 		fprintf(stderr, "Could not open audio in %s\n", filename);
 		return 0;
 	}
 
-	player->ov_info = ov_info(&player->ov_file, -1);
+	player->ov_info = *ov_info(player->ov_file, -1);
 
 	/* Get the sound format, and figure out the OpenAL format */
-	if(player->ov_info->channels == 1)
+	if(player->ov_info.channels == 1)
 		player->format = AL_FORMAT_MONO16;
-	else if(player->ov_info->channels == 2)
+	else if(player->ov_info.channels == 2)
 		player->format = AL_FORMAT_STEREO16;
-	else if(player->ov_info->channels == 3)
+	/*
+	else if(player->ov_info.channels == 3)
 	{
-		/*
-		if(sf_command(player->sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
+		if(sf_command(player->ov_file, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
 			player->format = AL_FORMAT_BFORMAT2D_16;
-		*/
 	}
-	else if(player->sfinfo.channels == 4)
+	else if(player->ov_info.channels == 4)
 	{
-		/*
-		if(sf_command(player->sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
+		if(sf_command(player->ov_file, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
 			player->format = AL_FORMAT_BFORMAT3D_16;
-		*/
 	}
+	*/
 	if(!player->format)
 	{
-		fprintf(stderr, "Unsupported channel count: %d\n", player->ov_info->channels);
+		fprintf(stderr, "Unsupported channel count: %d\n", player->ov_info.channels);
 		fclose(player->fp);
 		player->ov_file = NULL;
 		return 0;
 	}
 
-	frame_size = (size_t)(BUFFER_SAMPLES * player->ov_info->channels) * sizeof(short);
+	frame_size = (size_t)(BUFFER_SAMPLES * player->ov_info.channels) * sizeof(short);
 	player->membuf = malloc(frame_size);
 
 	return 1;
 }
 
 /* Closes the audio file stream */
-static void ClosePlayerFile(StreamPlayer *player)
+void ClosePlayerFile(StreamPlayer *player)
 {
-	if(player->sndfile)
-	sf_close(player->sndfile);
-	player->sndfile = NULL;
+	if(player->fp)
+		fclose(player->fp);
+	if(player->ov_file)
+		player->ov_file = NULL;
 
 	free(player->membuf);
 	player->membuf = NULL;

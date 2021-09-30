@@ -277,7 +277,6 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	char *path;
 	char *filename;
 	bool issample;
-	StreamPlayer *sp;
 	for (int i = 0; i < n_events; i++)
 	{
 		event = json_object_array_get_idx(events, i);
@@ -300,39 +299,22 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			strlcat(ogg_path, ".ogg", MAXSTR);
 			DPRINT(1, "ogg_path: %s", ogg_path);
 			DPRINT(1, "issample: %d", issample);
-			/*
-			sounds[sound_counter] = *al_load(ogg_path);
+			sounds[sound_counter].fp = ogg_path;
 			sounds[sound_counter].path = path;
 			sounds[sound_counter].issample = issample;
 			sound_counter++;
-			*/
 			
-			sp = NewPlayer();
-			if (!OpenPlayerFile(sp, ogg_path))
+			/*
+			DPRINT(1, "sp_counter: %d", sp_counter);
+			StreamPlayerArr[sp_counter] = *NewPlayer();
+			if (!OpenPlayerFile(&StreamPlayerArr[sp_counter], ogg_path))
 				continue;
+			StreamPlayerArr[sp_counter].fm_path = path;
+			sp_counter++;
+			*/
 		}
 	}
-	DPRINT(2, "sound_counter: %d, sp_counter: %d", sound_counter, sp_counter);
-
-	//DPRINT(2, "dirbank: %s", bank->dirbank);
-	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
-	/*
-	DIR *d;
-	struct dirent *dir;
-	d = opendir(bank->dirbank);
-	if (d) {
-		while ((dir = readdir(d)) != NULL) {
-			if (dir->d_name[0] != '.')	/ filter out '.' and '..' and hidden files '.*'
-			{
-				DPRINT(2, "sample %s", dir->d_name);
-				/ TODO: implement loading the sample into memory
-			}
-		}
-		closedir(d);
-	} else {
-		fprintf(stderr, "Error opening dirbank at %s\n", bank->dirbank);
-	}
-	*/
+	DPRINT(2, "sound_counter: %d", sound_counter);
 	return FM_OK;
 }
 
