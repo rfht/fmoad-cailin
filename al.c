@@ -249,6 +249,62 @@ static int UpdatePlayer(StreamPlayer *player)
 	return 1;
 }
 
+/* Opens the first audio stream of the named file. If a file is already open,
+ * it will be closed first. */
+static int OpenPlayerFile(StreamPlayer *player, const char *filename)
+{
+	size_t frame_size;
+
+	ClosePlayerFile(player);
+
+	/* Open the audio file and check that it's usable. */
+	player->sndfile = sf_open(filename, SFM_READ, &player->sfinfo);
+	if(!player->sndfile)
+	{
+		fprintf(stderr, "Could not open audio in %s: %s\n", filename, sf_strerror(NULL));
+		return 0;
+	}
+
+	/* Get the sound format, and figure out the OpenAL format */
+	if(player->sfinfo.channels == 1)
+		player->format = AL_FORMAT_MONO16;
+	else if(player->sfinfo.channels == 2)
+		player->format = AL_FORMAT_STEREO16;
+	else if(player->sfinfo.channels == 3)
+	{
+		if(sf_command(player->sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
+			player->format = AL_FORMAT_BFORMAT2D_16;
+	}
+	else if(player->sfinfo.channels == 4)
+	{
+		if(sf_command(player->sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
+			player->format = AL_FORMAT_BFORMAT3D_16;
+	}
+	if(!player->format)
+	{
+		fprintf(stderr, "Unsupported channel count: %d\n", player->sfinfo.channels);
+		sf_close(player->sndfile);
+		player->sndfile = NULL;
+		return 0;
+	}
+
+	frame_size = (size_t)(BUFFER_SAMPLES * player->sfinfo.channels) * sizeof(short);
+	player->membuf = malloc(frame_size);
+
+	return 1;
+}
+
+/* Closes the audio file stream */
+static void ClosePlayerFile(StreamPlayer *player)
+{
+	if(player->sndfile)
+	sf_close(player->sndfile);
+	player->sndfile = NULL;
+
+	free(player->membuf);
+	player->membuf = NULL;
+}
+
 // functions borrowed from C++ (https://indiegamedev.net/2020/01/16/how-to-stream-ogg-files-with-openal-in-c/) disabled for now
 #if 0
 size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle)
