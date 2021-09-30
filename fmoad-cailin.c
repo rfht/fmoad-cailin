@@ -146,8 +146,8 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	newbank->guid = json_object_get_string(json_object_object_get(newbank->jo, "GUID"));
 	DPRINT(2, "filename: %s, shortname: %s, db: %s, jo_path: %s, path: %s, guid: %s", filename, shortname, db, jo_path, newbank->path, newbank->guid);
 
-	// TEST for newbank->jo
-	json_object *test = json_object_object_get(newbank->jo, "events");	// TODO: replace with json_object_object_get_ex()
+	/*
+	json_object *test = json_object_object_get(newbank->jo, "events");
 	size_t n_test = json_object_array_length(test);
 	DPRINT(1, "n_test: %zu", n_test);
 	json_object *test_obj;
@@ -159,6 +159,7 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(json_object_object_get(test_obj, "path")));
 		}
 	}
+	*/
 
 	*bank = newbank;
 	return FM_OK;
@@ -226,6 +227,7 @@ FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, 
 
 FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
+	STUB();
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
 	DPRINT(3, "sound_idx: %d", eventinstance->evd->sound_idx);
 	DPRINT(3, "sound object path: %s", sounds[eventinstance->evd->sound_idx].path);
@@ -275,7 +277,7 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	char *path;
 	char *filename;
 	bool issample;
-	// TODO: this way of preloading sounds is slow
+	StreamPlayer *sp;
 	for (int i = 0; i < n_events; i++)
 	{
 		event = json_object_array_get_idx(events, i);
@@ -298,13 +300,19 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			strlcat(ogg_path, ".ogg", MAXSTR);
 			DPRINT(1, "ogg_path: %s", ogg_path);
 			DPRINT(1, "issample: %d", issample);
+			/*
 			sounds[sound_counter] = *al_load(ogg_path);
 			sounds[sound_counter].path = path;
 			sounds[sound_counter].issample = issample;
 			sound_counter++;
+			*/
+			
+			sp = NewPlayer();
+			if (!OpenPlayerFile(sp, ogg_path))
+				continue;
 		}
 	}
-	DPRINT(2, "sound_counter: %d", sound_counter);
+	DPRINT(2, "sound_counter: %d, sp_counter: %d", sound_counter, sp_counter);
 
 	//DPRINT(2, "dirbank: %s", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417

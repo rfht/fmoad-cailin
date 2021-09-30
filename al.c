@@ -258,37 +258,43 @@ static int OpenPlayerFile(StreamPlayer *player, const char *filename)
 	ClosePlayerFile(player);
 
 	/* Open the audio file and check that it's usable. */
-	player->sndfile = sf_open(filename, SFM_READ, &player->sfinfo);
-	if(!player->sndfile)
+	player->fp = fopen(filepath, "r");
+	if(ov_open_callbacks(player->fp, &player->ov_file, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0)
 	{
-		fprintf(stderr, "Could not open audio in %s: %s\n", filename, sf_strerror(NULL));
+		fprintf(stderr, "Could not open audio in %s\n", filename);
 		return 0;
 	}
 
+	player->ov_info = ov_info(&player->ov_file, -1);
+
 	/* Get the sound format, and figure out the OpenAL format */
-	if(player->sfinfo.channels == 1)
+	if(player->ov_info->channels == 1)
 		player->format = AL_FORMAT_MONO16;
-	else if(player->sfinfo.channels == 2)
+	else if(player->ov_info->channels == 2)
 		player->format = AL_FORMAT_STEREO16;
-	else if(player->sfinfo.channels == 3)
+	else if(player->ov_info->channels == 3)
 	{
+		/*
 		if(sf_command(player->sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
 			player->format = AL_FORMAT_BFORMAT2D_16;
+		*/
 	}
 	else if(player->sfinfo.channels == 4)
 	{
+		/*
 		if(sf_command(player->sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
 			player->format = AL_FORMAT_BFORMAT3D_16;
+		*/
 	}
 	if(!player->format)
 	{
-		fprintf(stderr, "Unsupported channel count: %d\n", player->sfinfo.channels);
-		sf_close(player->sndfile);
-		player->sndfile = NULL;
+		fprintf(stderr, "Unsupported channel count: %d\n", player->ov_info->channels);
+		fclose(player->fp);
+		player->ov_file = NULL;
 		return 0;
 	}
 
-	frame_size = (size_t)(BUFFER_SAMPLES * player->sfinfo.channels) * sizeof(short);
+	frame_size = (size_t)(BUFFER_SAMPLES * player->ov_info->channels) * sizeof(short);
 	player->membuf = malloc(frame_size);
 
 	return 1;

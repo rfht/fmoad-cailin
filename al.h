@@ -37,6 +37,7 @@ typedef struct StreamPlayer {
 	ALuint buffers[NUM_BUFFERS];
 	ALuint source;
 
+	FILE *fp;
 	OggVorbis_File ov_file;
 	vorbis_info ov_info;
 	short *membuf;
@@ -56,6 +57,9 @@ typedef struct SoundObject{
 
 static SoundObject sounds[MAXSOUNDS];
 static unsigned int sound_counter = 0;
+
+static StreamPlayer StreamPlayerArr[MAXSOUNDS];
+static unsigned int sp_counter = 0;
 
 static ALuint al_buffers[NUM_BUFFERS];
 static ALuint al_sources[NUM_SOURCES];
