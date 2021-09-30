@@ -95,7 +95,7 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 		test_obj = json_object_array_get_idx(test, i);
 		if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
 		{
-			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(test_obj));
+			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(json_object_object_get(test_obj, "path")));
 		}
 	}
 
