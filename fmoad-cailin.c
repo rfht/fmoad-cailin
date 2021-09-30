@@ -1,6 +1,35 @@
 #include "fmoad-cailin.h"
 #include "al.h"
 
+const char **get_event_paths(BANK *bank)
+{
+	json_object *events = json_object_object_get(bank->jo, "events");	// TODO: replace with json_object_object_get_ex()
+	size_t n_events = json_object_array_length(events);
+	const char** ret = NULL;
+	json_object *event;
+	for (int i = 0; i < n_events; i++)
+	{
+		event = json_object_array_get_idx(events, i);
+		//if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
+		ret[i] = json_object_get_string(json_object_object_get(event, "path"));
+		DPRINT(1, "%d: %s\n", i+1, ret[i]);
+	}
+	return ret;
+}
+
+const char **get_vca_paths(BANK *bank)
+{
+	json_object *vcas = json_object_object_get(bank->jo, "VCAs");	// TODO: replace with json_object_object_get_ex()
+	size_t n_vcas = json_object_array_length(vcas);
+	json_object *vca;
+	for (int i = 0; i < n_vcas; i++)
+	{
+		vca = json_object_array_get_idx(vcas, i);
+		DPRINT(1, "%d: %s\n", i+1, json_object_get_string(json_object_object_get(vca, "path")));
+	}
+	return NULL;
+}
+
 FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 {
 	/* TODO: FMOD_Studio_System_Create is the first function called by Celeste.
@@ -18,7 +47,7 @@ FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 		init_done = 1;
 	}
 	// TODO: create new system object at the address **system
-	DPRINT(2, "headerversion %d\n", headerversion);
+	DPRINT(2, "headerversion %d", headerversion);
 	return FM_OK;
 }
 
@@ -70,7 +99,6 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	strlcat(db, "o", sizeof(db) * MAXSTR); // TODO: check return val
 	strlcpy(jo_path, shortname, MAXSTR);
 	strlcat(jo_path, ".json", MAXSTR);
-	DPRINT(2, "filename: %s, shortname: %s, db: %s, jo_path: %s", filename, shortname, db, jo_path);
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	BANK *newbank = malloc(sizeof(BANK));
 	if (!newbank)
@@ -84,6 +112,9 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	newbank->bankpath = filename;
 	newbank->dirbank = db;
 	newbank->jo = jo;	// the json_object structure
+	newbank->path = json_object_get_string(json_object_object_get(newbank->jo, "path"));
+	newbank->guid = json_object_get_string(json_object_object_get(newbank->jo, "GUID"));
+	DPRINT(2, "filename: %s, shortname: %s, db: %s, jo_path: %s, path: %s, guid: %s", filename, shortname, db, jo_path, newbank->path, newbank->guid);
 
 	// TEST for newbank->jo
 	json_object *test = json_object_object_get(newbank->jo, "events");	// TODO: replace with json_object_object_get_ex()

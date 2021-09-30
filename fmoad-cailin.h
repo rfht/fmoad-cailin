@@ -133,6 +133,8 @@ typedef struct {
 	const char *bankpath;
 	const char *dirbank;
 	json_object *jo;
+	const char *path;	// the FMOD bank internal path, like "bank:/Master Bank"
+	const char *guid;
 } BANK;
 
 typedef struct {
@@ -193,3 +195,6 @@ FM_RESULT FMOD_Studio_System_SetListenerAttributes();	// TODO: complete function
 FM_RESULT FMOD_Studio_System_Update(SYSTEM *system);
 FM_RESULT FMOD_Studio_VCA_SetVolume(VCA *vca, float volume);
 FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume);
+
+const char **get_event_paths(BANK *bank);
+const char **get_vca_paths(BANK *bank);
