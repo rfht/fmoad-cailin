@@ -7,8 +7,8 @@
 #include <libgen.h>
 #include <json-c/json.h>
 
-#define PROJ	"FMOAD-CAILIN"	// project name
-#define MAXSTR	1024
+#define PROJ		"FMOAD-CAILIN"	// project name
+#define MAXSTR		1024
 
 #define FM_INITFLAGS			unsigned int
 #define FM_SOUND			int

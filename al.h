@@ -6,6 +6,8 @@
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
+#define MAXSOUNDS	65536
+
 // disable until reviewed
 #if 0
 struct StreamingAudioData
@@ -31,11 +33,14 @@ typedef struct {
 	vorbis_info *vi;
 	char *handle;
 	size_t size;
-} vorbis_object;
+	const char *path;	// FMOD internal path
+} sound_object;
+
+static sound_object sounds[MAXSOUNDS];
 
 int al_init(void);
-vorbis_object *al_load (char *filepath);
-int al_play(vorbis_object *vo);
+sound_object *al_load (char *filepath);
+int al_play(sound_object *vo);
 void al_check_error(void);
 //int playOgg (char *eventPath);
 size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle);

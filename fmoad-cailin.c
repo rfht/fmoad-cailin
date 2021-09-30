@@ -59,7 +59,7 @@ FM_RESULT FMOD_Studio_System_Initialize(SYSTEM *system,
 	// ignoring studioflags, flags , and extradriverdata for now
 	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
 	// TEST SOUND
-	vorbis_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
+	sound_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
 	fprintf(stderr, "test_sound size: %ld\n", (long)test_sound->size);
 	al_play(test_sound);
 	return FM_OK;
@@ -247,7 +247,7 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.')	// filter out '.' and '..' and hidden files '.*'
 			{
-				DPRINT(2, "sample %s\n", dir->d_name);
+				DPRINT(2, "sample %s", dir->d_name);
 				// TODO: implement loading the sample into memory
 			}
 		}
