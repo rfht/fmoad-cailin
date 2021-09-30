@@ -1,6 +1,7 @@
 #ifndef AL_H
 #define AL_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <AL/alut.h>
 #include <vorbis/codec.h>
@@ -34,9 +35,11 @@ typedef struct {
 	char *handle;
 	size_t size;
 	const char *path;	// FMOD internal path
+	bool issample;
 } sound_object;
 
 static sound_object sounds[MAXSOUNDS];
+static unsigned int sound_counter = 0;
 
 int al_init(void);
 sound_object *al_load (char *filepath);

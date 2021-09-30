@@ -240,23 +240,61 @@ FM_RESULT FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescriptio
 
 FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 {
-	DPRINT(2, "dirbank: %s", bank->dirbank);
+	// iterate over all events in the bank
+	json_object *events = json_object_object_get(bank->jo, "events");	// TODO: replace with json_object_object_get_ex()
+	size_t n_events = json_object_array_length(events);
+	json_object *event;
+	json_object *files;
+	json_object *file;
+	char *path;
+	char *filename;
+	bool issample;
+	for (int i = 0; i < n_events; i++)
+	{
+		event = json_object_array_get_idx(events, i);
+		files = json_object_object_get(event, "files");
+		path = (char *)json_object_get_string(json_object_object_get(event, "path"));
+		DPRINT(1, "%s: %zu", path, json_object_array_length(files));
+		if (json_object_array_length(files) == 1)	// TODO: not accounting for >1
+		// for (int i = 0; i < json_object_array_length(files); i++)
+		{
+			filename[0] = '\0';	// empty the string array
+			file = json_object_array_get_idx(files, 0);
+			filename = (char *)json_object_get_string(json_object_object_get(file, "filename"));
+			issample = json_object_get_boolean(json_object_object_get(file, "issample"));
+			char ogg_path[MAXSTR];
+			strlcpy(ogg_path, bank->dirbank, MAXSTR);
+			strlcat(ogg_path, "/", MAXSTR);
+			strlcat(ogg_path, bank->name, MAXSTR);
+			strlcat(ogg_path, "-", MAXSTR);
+			strlcat(ogg_path, filename, MAXSTR);
+			strlcat(ogg_path, ".ogg", MAXSTR);
+			DPRINT(1, "ogg_path: %s", ogg_path);
+			DPRINT(1, "issample: %d", issample);
+			//sound_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
+			// store issample, path
+		}
+	}
+
+	//DPRINT(2, "dirbank: %s", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417
+	/*
 	DIR *d;
 	struct dirent *dir;
 	d = opendir(bank->dirbank);
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
-			if (dir->d_name[0] != '.')	// filter out '.' and '..' and hidden files '.*'
+			if (dir->d_name[0] != '.')	/ filter out '.' and '..' and hidden files '.*'
 			{
 				DPRINT(2, "sample %s", dir->d_name);
-				// TODO: implement loading the sample into memory
+				/ TODO: implement loading the sample into memory
 			}
 		}
 		closedir(d);
 	} else {
 		fprintf(stderr, "Error opening dirbank at %s\n", bank->dirbank);
 	}
+	*/
 	return FM_OK;
 }
 
