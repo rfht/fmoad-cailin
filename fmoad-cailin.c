@@ -72,10 +72,6 @@ FM_RESULT FMOD_Studio_System_Initialize(SYSTEM *system,
 {
 	// ignoring studioflags, flags , and extradriverdata for now
 	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
-	// TEST SOUND
-	sound_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
-	fprintf(stderr, "test_sound size: %ld\n", (long)test_sound->size);
-	al_play(test_sound);
 	return FM_OK;
 }
 
