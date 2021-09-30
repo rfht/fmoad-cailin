@@ -119,14 +119,14 @@ typedef enum FM_RESULT {
 
 #define FM_VECTOR			float
 
-typedef struct {
+typedef struct FM_3D_ATTRIBUTES{
 	FM_VECTOR position;
 	FM_VECTOR velocity;
 	FM_VECTOR forward;
 	FM_VECTOR up;
 } FM_3D_ATTRIBUTES;
 
-typedef struct {
+typedef struct BANK{
 	const char *name;
 	const char *parentdir;
 	const char *bankpath;
@@ -136,29 +136,29 @@ typedef struct {
 	const char *guid;
 } BANK;
 
-typedef struct {
+typedef struct SYSTEM{
 	unsigned int maxchannels;
 	unsigned int flags;
 	unsigned int studioflags;
 } SYSTEM;
 
-typedef struct {
+typedef struct VCA{
 	const char *path;
 	float volume;
 	float finalvolume;
 } VCA;
 
-typedef struct {
+typedef struct BUS{
 	const char *path;
 	bool paused;
 } BUS;
 
-typedef struct {
+typedef struct EVENTDESCRIPTION{
 	const char *path;
 	int sound_idx;		// index of the sound_object in the sounds array
 } EVENTDESCRIPTION;
 
-typedef struct {
+typedef struct EVENTINSTANCE{
 	EVENTDESCRIPTION *evd;
 } EVENTINSTANCE;
 

@@ -30,8 +30,9 @@ void al_check_error(void)
 int al_init(void)
 {
 	alutInit (NULL, NULL);
-	alGenBuffers(NUM_BUFFERS, al_buffers);
-	alGenSources (NUM_SOURCES, al_sources);
+	// TODO: check for errors
+	//alGenBuffers(NUM_BUFFERS, al_buffers);
+	//alGenSources (NUM_SOURCES, al_sources);
 	return 0;
 }
 
@@ -116,6 +117,136 @@ int al_play(SoundObject *so)
 	*/
 //	alutExit ();
 	return EXIT_SUCCESS;
+}
+
+// from openal-soft's alstream.c example
+static StreamPlayer *NewPlayer(void)
+{
+	StreamPlayer *player;
+	player = malloc(sizeof(*player));
+	assert(player != NULL);
+	alGenBuffers(NUM_BUFFERS, player->buffers);
+	assert(alGetError() == AL_NO_ERROR && "Could not create buffers");
+	alGenSources(1, &player->source);
+	asser(alGetError() == AL_NO_ERROR && "Coud not create source");
+
+	/* Set parameters so mono sources play out the front-center speaker and
+	 * won't distance attenuate. */
+	alSource3i(player->source, AL_POSITION, 0, 0, -1);
+	alSourcei(player->source, AL_SOURCE_RELATIVE, AL_TRUE);
+	alSourcei(player->source, AL_ROLLOFF_FACTOR, 0);
+	assert(alGetError() == AL_NO_ERROR && "Could not set source parameters");
+
+	return player;
+}
+
+// from openal-soft's alstream.c example
+static void DeletePlayer(StreamPlayer *player)
+{
+	alDeleteSources(1, &player->source);
+	alDeleteBuffers(NUM_BUFFERS, player->buffers);
+	if(alGetError() != AL_NO_ERROR)
+		fprintf(stderr, "Failed to delete object IDs\n");
+	memset(play, 0, sizeof(*player));
+	free(player);
+}
+
+// from openal-soft's alstream.c example
+static int StartPlayer(StreamPlayer *player)
+{
+	ALsizei i;
+
+	/* Rewind the source position and clear the buffer queue */
+	alSourceRewind(player->source);
+	alSourcei(player->source, AL_BUFFER, 0);
+
+	/* Fill the buffer queue */
+	for(i = 0;i < NUM_BUFFERS;i++)
+	{
+		/* Get some data to give it to the buffer */
+		sf_count_t slen = sf_readf_short(player->sndfile, player->membuf, BUFFER_SAMPLES);
+		if(slen < 1) break;
+
+		slen *= player->sfinfo.channels * (sf_count_t)sizeof(short);
+		alBufferData(player->buffers[i], player->format, player->membuf, (ALsizei)slen,
+			player->sfinfo.samplerate);
+	}
+	if(alGetError() != AL_NO_ERROR)
+	{
+		fprintf(stderr, "Error buffering for playback\n");
+		return 0;
+	}
+
+	/* Now queue and start playback! */
+	alSourceQueueBuffers(player->source, i, player->buffers);
+	alSourcePlay(player->source);
+	if(alGetError() != AL_NO_ERROR)
+	{
+		fprintf(stderr, "Error starting playback\n");
+		return 0;
+	}
+
+	return 1;
+}
+
+static int UpdatePlayer(StreamPlayer *player)
+{
+	ALint processed, state;
+
+	/* Get relevant source info */
+	alGetSourcei(player->source, AL_SOURCE_STATE, &state);
+	alGetSourcei(player->source, AL_BUFFERS_PROCESSED, &processed);
+	if(alGetError() != AL_NO_ERROR)
+	{
+		fprintf(stderr, "Error checking source state\n");
+		return 0;
+	}
+
+	/* Unqueue and handle each processed buffer */
+	while(processed > 0)
+	{
+		ALuint bufid;
+		sf_count_t slen;
+
+		alSourceUnqueueBuffers(player->source, 1, &bufid);
+		processed--;
+
+		/* Read the next chunk of data, refill the buffer, and queue it
+		 * back on the source */
+		slen = sf_readf_short(player->sndfile, player->membuf, BUFFER_SAMPLES);
+		if(slen > 0)
+		{
+			slen *= player->sfinfo.channels * (sf_count_t)sizeof(short);
+			alBufferData(bufid, player->format, player->membuf, (ALsizei)slen,
+				player->sfinfo.samplerate);
+			alSourceQueueBuffers(player->source, 1, &bufid);
+		}
+		if(alGetError() != AL_NO_ERROR)
+		{
+			fprintf(stderr, "Error buffering data\n");
+			return 0;
+		}
+	}
+
+	/* Make sure the source hasn't underrun */
+	if(state != AL_PLAYING && state != AL_PAUSED)
+	{
+		ALint queued;
+
+		/* If no buffers are queued, playback is finished */
+		alGetSourcei(player->source, AL_BUFFERS_QUEUED, &queued);
+		if(queued == 0)
+			return 0;
+
+		alSourcePlay(player->source);
+		if(alGetError() != AL_NO_ERROR)
+		{
+			fprintf(stderr, "Error restarting playback\n");
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 // functions borrowed from C++ (https://indiegamedev.net/2020/01/16/how-to-stream-ogg-files-with-openal-in-c/) disabled for now

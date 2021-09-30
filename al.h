@@ -8,7 +8,7 @@
 #include <vorbis/vorbisfile.h>
 
 #define MAXSOUNDS	65536
-#define NUM_BUFFERS	16
+#define NUM_BUFFERS	4
 #define BUFFER_SIZE	65536
 #define NUM_SOURCES	16
 
@@ -31,6 +31,19 @@ struct StreamingAudioData
 	size_t duration;
 };
 #endif
+
+// from openal-soft's alstream.c example
+typedef struct StreamPlayer {
+	ALuint buffers[NUM_BUFFERS];
+	ALuint source;
+
+	SNDFILE *sndfile;
+	SF_INFO sfinfo;
+	short *membuf;
+
+	/* The format of the output stream (sample rate is in sfinfo) */
+	ALenum format;
+} StreamPlayer;
 
 typedef struct SoundObject{
 	const char *fp;		// filepath
@@ -59,5 +72,12 @@ size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fi
 int32_t seek_ogg_callback(void* fileHandle, ogg_int64_t to, int32_t type);
 long int tell_ogg_callback(void* fileHandle);
 static inline ALenum to_al_format(short channels);
+
+//from openal-soft's alstream.c
+static StreamPlayer *NewPlayer(void);
+static void DeletePlayer(StreamPlayer *player);
+static void ClosePlayer(StreamPlayer *player);
+static int StartPlayer(StreamPlayer *player);
+static int UpdatePlayer(StreamPlayer *player);
 
 #endif // AL_H
