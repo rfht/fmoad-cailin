@@ -1,6 +1,17 @@
 #include "fmoad-cailin.h"
 #include "al.h"
 
+int get_sound_idx(char *path)
+{
+	for (int i = 0; i < sound_counter; i++)
+	{
+		if (!strncmp(path, sounds[i].path, MAXSTR))
+			return i;
+	}
+	return -1;	// not found, this is an error
+}
+
+#if 0
 const char **get_event_paths(BANK *bank)
 {
 	json_object *events = json_object_object_get(bank->jo, "events");	// TODO: replace with json_object_object_get_ex()
@@ -31,6 +42,7 @@ const char **get_vca_paths(BANK *bank)
 	}
 	return ret;
 }
+#endif
 
 FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 {
@@ -156,7 +168,6 @@ FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 
 FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
 {
-	DPRINT(1, "path: %s", path);
 	/*
 	 * example: event:/env/amb/worldmap
 	 *
@@ -165,6 +176,13 @@ FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDES
 	 * in this object, query for "files":[]"filename"
 	 * this will get "env_amb_worldmap"
 	 */
+
+	EVENTDESCRIPTION *newevent = malloc(sizeof(EVENTDESCRIPTION));
+	if (!newevent)
+		err(1, NULL);
+	newevent->path = path;
+	newevent->sound_idx = get_sound_idx((char *)path);	// returns -1 if error;
+	DPRINT(1, "path: %s, idx: %d", newevent->path, newevent->sound_idx);
 
 	/*
 	json_object *test = json_object_object_get(newbank->jo, "events");
@@ -249,6 +267,7 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	char *path;
 	char *filename;
 	bool issample;
+	// TODO: this way of preloading sounds is slow
 	for (int i = 0; i < n_events; i++)
 	{
 		event = json_object_array_get_idx(events, i);
@@ -271,10 +290,13 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			strlcat(ogg_path, ".ogg", MAXSTR);
 			DPRINT(1, "ogg_path: %s", ogg_path);
 			DPRINT(1, "issample: %d", issample);
-			//sound_object *test_sound = al_load("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/ui.banko/ui-ui_main_button_select.ogg");
-			// store issample, path
+			sounds[sound_counter] = *al_load(ogg_path);
+			sounds[sound_counter].path = path;
+			sounds[sound_counter].issample = issample;
+			sound_counter++;
 		}
 	}
+	DPRINT(2, "sound_counter: %d", sound_counter);
 
 	//DPRINT(2, "dirbank: %s", bank->dirbank);
 	// https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program/17683417

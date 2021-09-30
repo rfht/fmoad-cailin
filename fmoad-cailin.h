@@ -155,9 +155,8 @@ typedef struct {
 } BUS;
 
 typedef struct {
-	SYSTEM *sys;
 	const char *path;
-	FM_SOUND **sounds;
+	int sound_idx;		// index of the sound_object in the sounds array
 } EVENTDESCRIPTION;
 
 FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank);
@@ -196,5 +195,9 @@ FM_RESULT FMOD_Studio_System_Update(SYSTEM *system);
 FM_RESULT FMOD_Studio_VCA_SetVolume(VCA *vca, float volume);
 FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume);
 
+int get_sound_idx(char *path);
+
+#if 0
 const char **get_event_paths(BANK *bank);
 const char **get_vca_paths(BANK *bank);
+#endif
