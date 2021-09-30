@@ -32,16 +32,16 @@ struct StreamingAudioData
 };
 #endif
 
-typedef struct {
+typedef struct SoundObject{
 	const char *fp;		// filepath
 	vorbis_info *vi;
 	char *handle;
 	size_t size;
 	const char *path;	// FMOD internal path
 	bool issample;
-} sound_object;
+} SoundObject;
 
-static sound_object sounds[MAXSOUNDS];
+static SoundObject sounds[MAXSOUNDS];
 static unsigned int sound_counter = 0;
 
 static ALuint al_buffers[NUM_BUFFERS];
@@ -51,8 +51,8 @@ static int current_buffer;
 static int current_source;
 
 int al_init(void);
-sound_object *al_load (char *filepath);
-int al_play(sound_object *so);
+SoundObject *al_load (char *filepath);
+int al_play(SoundObject *so);
 void al_check_error(void);
 //int playOgg (char *eventPath);
 size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle);

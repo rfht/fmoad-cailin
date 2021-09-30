@@ -35,11 +35,11 @@ int al_init(void)
 	return 0;
 }
 
-sound_object *al_load (char *filepath)
+SoundObject *al_load (char *filepath)
 {
 	OggVorbis_File vf;
 	int current_section;
-	sound_object *out = (sound_object *)malloc(sizeof(sound_object));;
+	SoundObject *out = (SoundObject *)malloc(sizeof(SoundObject));;
 	// TODO: free() later
 	FILE *fp = fopen(filepath, "rb");
 	if(fp == NULL)
@@ -73,7 +73,7 @@ sound_object *al_load (char *filepath)
 	return out;
 }
 
-int al_play(sound_object *so)
+int al_play(SoundObject *so)
 {
 	alBufferData(al_buffers[current_buffer], to_al_format(so->vi->channels), so->handle, so->size, so->vi->rate);
 	al_check_error();
