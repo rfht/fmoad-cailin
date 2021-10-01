@@ -27,7 +27,7 @@ int get_sound_idx(char *path)
 	return -1;	// not found, this is an error
 }
 
-FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
+int FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 {
 	/* TODO: FMOD_Studio_System_Create is the first function called by Celeste.
 	 *	unclear if that is always the case. */
@@ -44,28 +44,28 @@ FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 		init_done = 1;
 	}
 	DPRINT(2, "headerversion %d", headerversion);
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_System_Initialize(SYSTEM *system,
+int FMOD_Studio_System_Initialize(SYSTEM *system,
 	int maxchannels, FM_STUDIO_INITFLAGS studioflags,
 	FM_INITFLAGS flags,
 	void *extradriverdata)
 {
-	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
-	return FM_OK;
+	DPRINT(2, "maxchannels: %d", maxchannels);
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
+int FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 	int listener,
 	FM_3D_ATTRIBUTES *attributes)
 {
 	 //attributes: are 3D attributes of the listener
 	DPRINT(2, "listener %d", listener);
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
+int FMOD_Studio_System_Update(SYSTEM *system)
 {
 	for (int i = 0; i < sp_counter; i++)
 	{
@@ -77,10 +77,10 @@ FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
 			}
 		}
 	}
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
+int FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	const char *filename, FM_STUDIO_LOAD_BANK_FLAGS flags,
 	BANK **bank)
 {
@@ -114,28 +114,28 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	DPRINT(2, "filename: %s, shortname: %s, db: %s, jo_path: %s, path: %s, guid: %s", filename, shortname, db, jo_path, newbank->path, newbank->guid);
 
 	*bank = newbank;
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_System_GetVCA(SYSTEM *system, char *path, VCA **vca)
+int FMOD_Studio_System_GetVCA(SYSTEM *system, char *path, VCA **vca)
 {
 	DPRINT(2, "path: %s", path);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_VCA_SetVolume(VCA *vca, float volume)
+int FMOD_Studio_VCA_SetVolume(VCA *vca, float volume)
 {
 	DPRINT(1, "volume: %f", volume);
 	// TODO: store the volume for the VCA
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
+int FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
+int FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
 {
 	/*
 	 * example: event:/env/amb/worldmap
@@ -154,26 +154,26 @@ FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDES
 	DPRINT(1, "path: %s, sound_idx: %d", newevent->path, newevent->sound_idx);
 	/* THIS SHOULD BE HANDLED IN ..._CreateInstance
 	if (newevent->sound_idx < 0)
-		return FM_ERR_INTERNAL;
+		return 1;
 	*/
 	*event = newevent;
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription)
+int FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription)
 {
 	// loads all non-streaming sample data used by the event
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance)
+int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance)
 {
 	int player_idx = -1; // -1 would be invalid
 
 	if (eventdescription->sound_idx < 0)
 	{
 		instance = NULL;
-		return FM_OK;	// don't mess; just keep going
+		return 0;	// don't mess; just keep going
 	}
 	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
 	newinstance->evd = eventdescription;
@@ -203,22 +203,22 @@ FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdes
 	StreamPlayerArr[player_idx].fm_path = sounds[newinstance->evd->sound_idx].path;
 	newinstance->sp_idx = player_idx;
 	*instance = newinstance;
-	return FM_OK;
+	return 0;
 }
 
 
-FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D)
+int FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D)
 {
 	DPRINT(2, "is3D %d", *is3D);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
+int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
 	if (!eventinstance)
 	{
 		// something went wrong earlier - bail
-		return FM_OK;
+		return 0;
 	}
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
 	DPRINT(1, "sound_idx: %d, sp_idx: %d", eventinstance->evd->sound_idx, eventinstance->sp_idx);
@@ -228,42 +228,41 @@ FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 		fprintf(stderr, "ERROR in StartPlayer\n");
 		exit(1);
 	}
-	//al_play(&sounds[eventinstance->evd->sound_idx]);
 	// TODO: check return value
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus)
+int FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus)
 {
 	DPRINT(1, "path %s", path);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused)
+int FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused)
 {
 	DPRINT(1, "paused %d", (int)paused);
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
+int FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetDescription(EVENTINSTANCE *eventinstance, EVENTDESCRIPTION **description)
+int FMOD_Studio_EventInstance_GetDescription(EVENTINSTANCE *eventinstance, EVENTDESCRIPTION **description)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
+int FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
 {
 	path = "event:/env/amb/worldmap\0";	// corresponds to ./Content/FMOD/Desktop/sfx.banko/sfx-env_amb_worldmap.ogg
 	*retrieved = strnlen(path, size) + 1;	// +1 to account for terminating null character
 	DPRINT(1, "path %s, buffer size %d, retrieved %d", path, size, *retrieved);
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
+int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 {
 	// iterate over all events in the bank
 	json_object *events = json_object_object_get(bank->jo, "events");	// TODO: replace with json_object_object_get_ex()
@@ -304,87 +303,87 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 		}
 	}
 	DPRINT(2, "sound_counter: %d", sound_counter);
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetVolume(EVENTINSTANCE *eventinstance, float volume)
+int FMOD_Studio_EventInstance_SetVolume(EVENTINSTANCE *eventinstance, float volume)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetLowLevelSystem(SYSTEM *system, FM_SYSTEM **lowLevelSystem)
+int FMOD_Studio_System_GetLowLevelSystem(SYSTEM *system, FM_SYSTEM **lowLevelSystem)
 {
 	// get the low level (FMOD) system object
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_GetListenerAttributes(SYSTEM *system, int listener, int *attributes)
+int FMOD_Studio_System_GetListenerAttributes(SYSTEM *system, int listener, int *attributes)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
+int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
+int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *volume, float *finalvolume)
+int FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *volume, float *finalvolume)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, int mode)
+int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, int mode)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_Get3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
+int FMOD_Studio_EventInstance_Get3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_System_Release(SYSTEM *system)
+int FMOD_Studio_System_Release(SYSTEM *system)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, char *name, float value)
+int FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, char *name, float value)
 {
 	DPRINT(4, "name: %s, value: %.2f", name, value);
-	return FM_OK;
+	return 0;
 }
 
-FM_RESULT FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, int *oneshot)
+int FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, int *oneshot)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused)
+int FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance)
+int FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode)
+int FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetPaused(EVENTINSTANCE *eventinstance, int *paused)
+int FMOD_Studio_EventInstance_GetPaused(EVENTINSTANCE *eventinstance, int *paused)
 {
 	STUB();
 }
 
-FM_RESULT FMOD_Studio_EventInstance_GetPlaybackState(EVENTINSTANCE *eventinstance, int *state)
+int FMOD_Studio_EventInstance_GetPlaybackState(EVENTINSTANCE *eventinstance, int *state)
 {
 	STUB();
 }
