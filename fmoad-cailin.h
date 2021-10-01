@@ -31,6 +31,7 @@
 #define FM_STUDIO_INITFLAGS		unsigned int
 #define FM_STUDIO_LOAD_BANK_FLAGS	unsigned int
 #define FM_SYSTEM			int
+//#define FM_STOP_MODE			int
 
 static bool init_done = false;
 static unsigned int loglevel = 0;
@@ -47,6 +48,11 @@ static unsigned int loglevel = 0;
 	DPRINT(2, "STUB"); \
 	return 0; \
 } while (0)
+
+typedef enum {
+	STOP_ALLOWFADEOUT,
+	STOP_IMMEDIATE
+} FM_STOP_MODE;
 
 typedef struct FM_3D_ATTRIBUTES{
 	float position;
@@ -95,7 +101,7 @@ typedef struct EVENTINSTANCE{
 int FMOD_Studio_Bank_LoadSampleData(BANK *bank);
 int FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused);
 int FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused);
-int FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode);
+int FMOD_Studio_Bus_StopAllEvents(BUS *bus, FM_STOP_MODE mode);
 int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance);
 int FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved);
 int FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D);
@@ -112,7 +118,7 @@ int FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, ch
 int FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused);
 int FMOD_Studio_EventInstance_SetVolume(EVENTINSTANCE *eventinstance, float volume);
 int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance);
-int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, int mode);
+int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mode);
 int FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance);
 int FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion);
 int FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus);

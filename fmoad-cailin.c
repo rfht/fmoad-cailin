@@ -137,32 +137,19 @@ int FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 
 int FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
 {
-	/*
-	 * example: event:/env/amb/worldmap
-	 *
-	 * in file Content/FMOD/Desktop/sfx.json
-	 * search for "path": "event:/env/amb/worldmap"
-	 * in this object, query for "files":[]"filename"
-	 * this will get "env_amb_worldmap"
-	 */
-
 	EVENTDESCRIPTION *newevent = malloc(sizeof(EVENTDESCRIPTION));
 	if (!newevent)
 		err(1, NULL);
 	newevent->path = path;
 	newevent->sound_idx = get_sound_idx((char *)path);	// returns -1 if error;
+	/* Errors (sound_idx < -) are handled in ..._CreateInstance */
 	DPRINT(1, "path: %s, sound_idx: %d", newevent->path, newevent->sound_idx);
-	/* THIS SHOULD BE HANDLED IN ..._CreateInstance
-	if (newevent->sound_idx < 0)
-		return 1;
-	*/
 	*event = newevent;
 	return 0;
 }
 
 int FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription)
 {
-	// loads all non-streaming sample data used by the event
 	STUB();
 }
 
@@ -178,10 +165,9 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
 	newinstance->evd = eventdescription;
 	int sound_num = newinstance->evd->sound_idx;
-	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, fp: %s, path: %s, issample: %d", sp_counter, sound_num, sounds[sound_num].fp, sounds[sound_num].path, sounds[sound_num].issample);
+	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, fp: %s, path: %s", sp_counter, sound_num, sounds[sound_num].fp, sounds[sound_num].path);
 
 	// check if a retired StreamPlayer can be reused
-
 	for (int i = 0; i <= sp_counter; i++)
 	{
 		if (StreamPlayerArr[i].retired)
@@ -190,6 +176,8 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 			break;
 		}
 	}
+
+	// no retired StreamPlayer found; therefore create a new one
 	if (player_idx < 0)
 		player_idx = sp_counter++;
 
@@ -209,8 +197,8 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 
 int FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D)
 {
-	DPRINT(2, "is3D %d", *is3D);
-	STUB();
+	DPRINT(2, "STUB; is3D %d", *is3D);
+	return 0;
 }
 
 int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
@@ -220,28 +208,25 @@ int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 		// something went wrong earlier - bail
 		return 0;
 	}
-	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
-	DPRINT(1, "sound_idx: %d, sp_idx: %d", eventinstance->evd->sound_idx, eventinstance->sp_idx);
-	DPRINT(1, "sound object path: %s", sounds[eventinstance->evd->sound_idx].path);
+	DPRINT(1, "sound_idx: %d, sp_idx: %d, path: %s", eventinstance->evd->sound_idx, eventinstance->sp_idx, sounds[eventinstance->evd->sound_idx].path);
 	if(!StartPlayer(&StreamPlayerArr[eventinstance->sp_idx]))
 	{
 		fprintf(stderr, "ERROR in StartPlayer\n");
 		exit(1);
 	}
-	// TODO: check return value
 	return 0;
 }
 
 int FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus)
 {
-	DPRINT(1, "path %s", path);
+	DPRINT(1, "path %s", path);	// TODO: create bus
 	STUB();
 }
 
 int FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused)
 {
-	DPRINT(1, "paused %d", (int)paused);
-	STUB();
+	DPRINT(1, "STUB; paused %d", (int)paused);
+	return 0;
 }
 
 int FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
@@ -265,14 +250,14 @@ int FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, cha
 int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 {
 	// iterate over all events in the bank
-	json_object *events = json_object_object_get(bank->jo, "events");	// TODO: replace with json_object_object_get_ex()
+	json_object *events = json_object_object_get(bank->jo, "events");
 	size_t n_events = json_object_array_length(events);
 	json_object *event;
 	json_object *files;
 	json_object *file;
 	char *path;
 	char *filename;
-	bool issample;
+	//bool issample;
 	for (int i = 0; i < n_events; i++)
 	{
 		event = json_object_array_get_idx(events, i);
@@ -280,12 +265,11 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 		path = (char *)json_object_get_string(json_object_object_get(event, "path"));
 		DPRINT(1, "%s: %zu", path, json_object_array_length(files));
 		if (json_object_array_length(files) == 1)	// TODO: not accounting for >1
-		// for (int i = 0; i < json_object_array_length(files); i++)
 		{
 			filename[0] = '\0';	// empty the string array
 			file = json_object_array_get_idx(files, 0);
 			filename = (char *)json_object_get_string(json_object_object_get(file, "filename"));
-			issample = json_object_get_boolean(json_object_object_get(file, "issample"));
+			//issample = json_object_get_boolean(json_object_object_get(file, "issample"));
 			char *ogg_path = reallocarray(NULL, MAXSTR, sizeof(char));
 			strlcpy(ogg_path, bank->dirbank, MAXSTR);
 			strlcat(ogg_path, "/", MAXSTR);
@@ -294,11 +278,10 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			strlcat(ogg_path, filename, MAXSTR);
 			strlcat(ogg_path, ".ogg", MAXSTR);
 			DPRINT(1, "ogg_path: %s", ogg_path);
-			DPRINT(1, "issample: %d", issample);
+			//DPRINT(1, "issample: %d", issample);
 			sounds[sound_counter].fp = ogg_path;
-			//strlcpy(sounds[sound_counter].fp, ogg_path, MAXSTR);
 			sounds[sound_counter].path = path;
-			sounds[sound_counter].issample = issample;
+			//sounds[sound_counter].issample = issample;
 			sound_counter++;
 		}
 	}
@@ -308,12 +291,12 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 
 int FMOD_Studio_EventInstance_SetVolume(EVENTINSTANCE *eventinstance, float volume)
 {
-	STUB();
+	DPRINT(2, "STUB; volume: %.2f", volume);
+	return 0;
 }
 
 int FMOD_Studio_System_GetLowLevelSystem(SYSTEM *system, FM_SYSTEM **lowLevelSystem)
 {
-	// get the low level (FMOD) system object
 	STUB();
 }
 
@@ -329,6 +312,7 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
+	// TODO: schedule instance to be destroyed when it stops
 	STUB();
 }
 
@@ -337,9 +321,16 @@ int FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *vol
 	STUB();
 }
 
-int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, int mode)
+int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mode)
 {
-	STUB();
+	if (eventinstance)	// avoid doing anything if there's a NULL
+	{
+		DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx, eventinstance->evd->path);
+		// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
+		DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx]);
+		// TODO: check return value
+	}
+	return 0;
 }
 
 int FMOD_Studio_EventInstance_Get3DAttributes(EVENTINSTANCE *eventinstance, int *attributes)
@@ -354,7 +345,7 @@ int FMOD_Studio_System_Release(SYSTEM *system)
 
 int FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, char *name, float value)
 {
-	DPRINT(4, "name: %s, value: %.2f", name, value);
+	DPRINT(4, "STUB; name: %s, value: %.2f", name, value);
 	return 0;
 }
 
@@ -365,6 +356,7 @@ int FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, i
 
 int FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused)
 {
+	// TODO: pause eventinstance
 	STUB();
 }
 
@@ -373,7 +365,7 @@ int FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance)
 	STUB();
 }
 
-int FMOD_Studio_Bus_StopAllEvents(BUS *bus, int mode)
+int FMOD_Studio_Bus_StopAllEvents(BUS *bus, FM_STOP_MODE mode)
 {
 	STUB();
 }
@@ -387,7 +379,3 @@ int FMOD_Studio_EventInstance_GetPlaybackState(EVENTINSTANCE *eventinstance, int
 {
 	STUB();
 }
-
-/* Missing API:
- * FMOD_Studio_EventInstance_GetParameterValue()
- */
