@@ -53,12 +53,6 @@ int al_init(void);
 int al_play(SoundObject *so);
 void al_check_error(void);
 
-/*
-size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle);
-int32_t seek_ogg_callback(void* fileHandle, ogg_int64_t to, int32_t type);
-long int tell_ogg_callback(void* fileHandle);
-*/
-
 StreamPlayer *NewPlayer(void);
 void DeletePlayer(StreamPlayer *player);
 void ClosePlayer(StreamPlayer *player);
