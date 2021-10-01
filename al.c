@@ -128,7 +128,7 @@ int StartPlayer(StreamPlayer *player)
 	alSourcei(player->source, AL_BUFFER, 0);
 
 	/* Fill the buffer queue */
-	for(i = 0;i < NUM_BUFFERS;i++)
+	for(i = 0; i < NUM_BUFFERS; i++)
 	{
 		/* Get some data to give it to the buffer */
 		//long slen = sf_readf_short(player->ov_file, player->membuf, BUFFER_SAMPLES);
@@ -136,7 +136,7 @@ int StartPlayer(StreamPlayer *player)
 		long ov_len = ov_read(player->ov_file, player->membuf, BUFFER_SAMPLES, 0, 2, 1, &current_section);
 		if(ov_len < 1) break;
 
-		ov_len *= player->ov_info.channels * (long)sizeof(short);
+		//ov_len *= player->ov_info.channels * (long)sizeof(char);	// This distorts audio!
 		alBufferData(player->buffers[i], player->format, player->membuf, (ALsizei)ov_len,
 			player->ov_info.rate);
 	}
@@ -183,11 +183,10 @@ int UpdatePlayer(StreamPlayer *player)
 
 		/* Read the next chunk of data, refill the buffer, and queue it
 		 * back on the source */
-		//ov_len = sf_readf_short(player->ov_file, player->membuf, BUFFER_SAMPLES);
 		ov_len = ov_read(player->ov_file, player->membuf, BUFFER_SAMPLES, 0, 2, 1, &current_section);
 		if(ov_len > 0)
 		{
-			ov_len *= player->ov_info.channels * (long)sizeof(short);
+			//ov_len *= player->ov_info.channels * (long)sizeof(char);	// this distorts audio
 			alBufferData(bufid, player->format, player->membuf, (ALsizei)ov_len,
 				player->ov_info.rate);
 			alSourceQueueBuffers(player->source, 1, &bufid);
@@ -247,7 +246,8 @@ int OpenPlayerFile(StreamPlayer *player, const char *filename)
 	/* Get the sound format, and figure out the OpenAL format */
 	if(player->ov_info.channels == 1)
 		player->format = AL_FORMAT_MONO16;
-	else if(player->ov_info.channels == 2)
+	//else if(player->ov_info.channels == 2)
+	else
 		player->format = AL_FORMAT_STEREO16;
 	/*
 	else if(player->ov_info.channels == 3)
@@ -269,7 +269,7 @@ int OpenPlayerFile(StreamPlayer *player, const char *filename)
 		return 0;
 	}
 
-	frame_size = (size_t)(BUFFER_SAMPLES * player->ov_info.channels) * sizeof(short);
+	frame_size = (size_t)(BUFFER_SAMPLES * player->ov_info.channels) * sizeof(char);
 	player->membuf = malloc(frame_size);
 
 	return 1;

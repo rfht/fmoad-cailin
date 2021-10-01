@@ -10,9 +10,11 @@
 #include <vorbis/vorbisfile.h>
 
 #define MAXSOUNDS	65536
-#define NUM_BUFFERS	4
+//#define NUM_BUFFERS	4
+#define NUM_BUFFERS	64
 #define BUFFER_SIZE	65536
-#define BUFFER_SAMPLES	8192
+//#define BUFFER_SAMPLES	8192
+#define BUFFER_SAMPLES	65536*16
 #define NUM_SOURCES	16
 
 // disable until reviewed

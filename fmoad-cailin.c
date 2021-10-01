@@ -88,27 +88,16 @@ FM_RESULT FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 
 FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
 {
-	/*
-	ALint al_state;
-	alGetSourcei(al_sources[0], AL_SOURCE_STATE, &al_state);
-	switch(al_state) {
-		case AL_INITIAL:
-			DPRINT(1, "al_state: AL_INITIAL");
-			break;
-		case AL_PLAYING:
-			DPRINT(1, "al_state: AL_PLAYING");
-			break;
-		case AL_PAUSED:
-			DPRINT(1, "al_state: AL_PAUSED");
-			break;
-		case AL_STOPPED:
-			DPRINT(1, "al_state: AL_STOPPED");
-			break;
-		default:
-			DPRINT(1, "al_state: Unrecognized state!");
+	for (int i = 0; i < sp_counter; i++)
+	{
+		if(!UpdatePlayer(&StreamPlayerArr[i]))
+		{
+			/*
+			fprintf(stderr, "ERROR in UpdatePlayer; i: %d, sp_counter: %d\n", i, sp_counter);
+			exit(1);
+			*/
+		}
 	}
-	*/
-	DPRINT(3, "STUB"); // stay quiet; this one is called a lot
 	return FM_OK;
 }
 
@@ -199,7 +188,9 @@ FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDES
 		err(1, NULL);
 	newevent->path = path;
 	newevent->sound_idx = get_sound_idx((char *)path);	// returns -1 if error;
-	DPRINT(1, "path: %s, idx: %d", newevent->path, newevent->sound_idx);
+	DPRINT(1, "path: %s, sound_idx: %d", newevent->path, newevent->sound_idx);
+	if (newevent->sound_idx < 0)
+		return FM_OK;	// TODO: return an actual error
 	*event = newevent;
 	return FM_OK;
 }
