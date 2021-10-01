@@ -56,4 +56,9 @@ What Works
 
 Other games remain to be seen...
 
+Debugging
+---------
+
+In order to get more verbose output, set the `FMOAD_LOGLEVEL` environment variable to 1 (or greater for more verbosity).
+
 License: ISC
