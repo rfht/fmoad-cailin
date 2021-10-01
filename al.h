@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <AL/alut.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
@@ -26,7 +27,7 @@ typedef struct StreamPlayer {
 	char *membuf;
 	const char *fm_path;	// FMOD internal path
 
-	/* The format of the output stream (sample rate is in sfinfo) */
+	/* The format of the output stream (sample rate is in ov_info) */
 	ALenum format;
 } StreamPlayer;
 
@@ -51,13 +52,13 @@ static int current_source;
 int al_init(void);
 int al_play(SoundObject *so);
 void al_check_error(void);
-//int playOgg (char *eventPath);
+
+/*
 size_t read_ogg_callback(void* destination, size_t size1, size_t size2, void* fileHandle);
 int32_t seek_ogg_callback(void* fileHandle, ogg_int64_t to, int32_t type);
 long int tell_ogg_callback(void* fileHandle);
-//static inline ALenum to_al_format(short channels);
+*/
 
-//from openal-soft's alstream.c
 StreamPlayer *NewPlayer(void);
 void DeletePlayer(StreamPlayer *player);
 void ClosePlayer(StreamPlayer *player);

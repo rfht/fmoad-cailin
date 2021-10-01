@@ -6,15 +6,6 @@
 
 #include "al.h"
 
-/*
-static inline ALenum to_al_format(short channels)
-{
-	if (channels == 1)
-		return AL_FORMAT_MONO16;
-	else return AL_FORMAT_STEREO16;
-}
-*/
-
 void al_check_error(void)
 {
 	ALenum error = alGetError();
@@ -31,10 +22,33 @@ void al_check_error(void)
 
 int al_init(void)
 {
-	alutInit (NULL, NULL);
-	// TODO: check for errors
-	//alGenBuffers(NUM_BUFFERS, al_buffers);
-	//alGenSources (NUM_SOURCES, al_sources);
+	const ALCchar *name;
+	ALCdevice *device;
+	ALCcontext *ctx;
+
+	device = NULL;
+	device = alcOpenDevice(NULL);	// select the default device
+	if(!device)
+	{
+		fprintf(stderr, "Could not open the OpenAL device!\n");
+		return 1;
+	}
+	ctx = alcCreateContext(device, NULL);
+	if(ctx == NULL || alcMakeContextCurrent(ctx) == ALC_FALSE)
+	{
+		if(ctx != NULL)
+			alcDestroyContext(ctx);
+		alcCloseDevice(device);
+		fprintf(stderr, "Could not set a context!\n");
+		return 1;
+	}
+	name = NULL;
+	if(alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT"))
+		name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
+	if(!name || alcGetError(device) != AL_NO_ERROR)
+		name = alcGetString(device, ALC_DEVICE_SPECIFIER);
+	printf("Opened \"%s\"\n", name);
+
 	return 0;
 }
 
@@ -78,10 +92,8 @@ int al_play(SoundObject *so)
 			alBufferData(released[i], to_al_format(so->vi->channels), pcmout, pos, so->vi->rate);
 		}
 		alSourceQueueBuffers(al_sources, count, released);
-		alutSleep(1/20.);
 	}
 	*/
-//	alutExit ();
 	return EXIT_SUCCESS;
 }
 
