@@ -43,7 +43,6 @@ FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 		fprintf(stderr, "[%s] FMOAD_LOGLEVEL=%d\n", PROJ, loglevel);
 		init_done = 1;
 	}
-	// TODO: create new system object at the address **system
 	DPRINT(2, "headerversion %d", headerversion);
 	return FM_OK;
 }
@@ -70,9 +69,12 @@ FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
 {
 	for (int i = 0; i < sp_counter; i++)
 	{
-		if(!UpdatePlayer(&StreamPlayerArr[i])) // returns 0 when playback finished or errors occurred. Prints a message if error.
+		if(StreamPlayerArr[i].retired == false)
 		{
-			// TODO: retire StreamPlayerArr[i]
+			if(!UpdatePlayer(&StreamPlayerArr[i])) // returns 0 when playback finished or errors occurred. Prints a message if error.
+			{
+				DeletePlayer(&StreamPlayerArr[i]);
+			}
 		}
 	}
 	return FM_OK;
@@ -166,6 +168,8 @@ FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdes
 
 FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance)
 {
+	int player_idx = -1; // -1 would be invalid
+
 	if (eventdescription->sound_idx < 0)
 	{
 		instance = NULL;
@@ -175,14 +179,29 @@ FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdes
 	newinstance->evd = eventdescription;
 	int sound_num = newinstance->evd->sound_idx;
 	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, fp: %s, path: %s, issample: %d", sp_counter, sound_num, sounds[sound_num].fp, sounds[sound_num].path, sounds[sound_num].issample);
-	StreamPlayerArr[sp_counter] = *NewPlayer();
-	if (!OpenPlayerFile(&StreamPlayerArr[sp_counter], sounds[newinstance->evd->sound_idx].fp))
+
+	// check if a retired StreamPlayer can be reused
+
+	for (int i = 0; i <= sp_counter; i++)
+	{
+		if (StreamPlayerArr[i].retired)
+		{
+			player_idx = i;
+			break;
+		}
+	}
+	if (player_idx < 0)
+		player_idx = sp_counter++;
+
+	memset(&StreamPlayerArr[player_idx], 0, sizeof(StreamPlayer));
+	StreamPlayerArr[player_idx] = *NewPlayer();
+	if (!OpenPlayerFile(&StreamPlayerArr[player_idx], sounds[newinstance->evd->sound_idx].fp))
 	{
 		fprintf(stderr, "ERROR with OpenPlayerFile; aborting\n");
 		exit(1);	// TODO: return an error instead
 	}
-	StreamPlayerArr[sp_counter].fm_path = sounds[newinstance->evd->sound_idx].path;
-	newinstance->sp_idx = sp_counter++;
+	StreamPlayerArr[player_idx].fm_path = sounds[newinstance->evd->sound_idx].path;
+	newinstance->sp_idx = player_idx;
 	*instance = newinstance;
 	return FM_OK;
 }
@@ -336,7 +355,7 @@ FM_RESULT FMOD_Studio_System_Release(SYSTEM *system)
 
 FM_RESULT FMOD_Studio_EventInstance_SetParameterValue(EVENTINSTANCE *eventinstance, char *name, float value)
 {
-	DPRINT(2, "name: %s, value: %.2f", name, value);
+	DPRINT(4, "name: %s, value: %.2f", name, value);
 	return FM_OK;
 }
 

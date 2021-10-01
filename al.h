@@ -45,6 +45,8 @@ typedef struct StreamPlayer {
 
 	/* The format of the output stream (sample rate is in ov_info) */
 	ALenum format;
+
+	bool retired;
 } StreamPlayer;
 
 typedef struct SoundObject{

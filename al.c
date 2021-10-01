@@ -113,6 +113,7 @@ StreamPlayer *NewPlayer(void)
 	StreamPlayer *player;
 	player = malloc(sizeof(*player));
 	assert(player != NULL);
+	player->retired = false;
 	alGenBuffers(NUM_BUFFERS, player->buffers);
 	assert(alGetError() == AL_NO_ERROR && "Could not create buffers");
 	alGenSources(1, &player->source);
@@ -135,8 +136,10 @@ void DeletePlayer(StreamPlayer *player)
 	alDeleteBuffers(NUM_BUFFERS, player->buffers);
 	if(alGetError() != AL_NO_ERROR)
 		fprintf(stderr, "Failed to delete object IDs\n");
-	memset(player, 0, sizeof(*player));
-	free(player);
+	player->retired = true;
+	fclose(player->fp);
+	//memset(player, 0, sizeof(*player));
+	//free(player);
 }
 
 // from openal-soft's alstream.c example
@@ -241,14 +244,11 @@ int UpdatePlayer(StreamPlayer *player)
 	return 1;
 }
 
-/* Opens the first audio stream of the named file. If a file is already open,
- * it will be closed first. */
+/* Opens the first audio stream of the named file. */
 int OpenPlayerFile(StreamPlayer *player, const char *filename)
 {
 	size_t frame_size;
 	player->ov_file = (OggVorbis_File *)malloc(sizeof(OggVorbis_File));
-
-	//ClosePlayerFile(player);
 
 	/* Open the audio file and check that it's usable. */
 	player->fp = fopen(filename, "r");
@@ -268,21 +268,8 @@ int OpenPlayerFile(StreamPlayer *player, const char *filename)
 	/* Get the sound format, and figure out the OpenAL format */
 	if(player->ov_info.channels == 1)
 		player->format = AL_FORMAT_MONO16;
-	//else if(player->ov_info.channels == 2)
 	else
 		player->format = AL_FORMAT_STEREO16;
-	/*
-	else if(player->ov_info.channels == 3)
-	{
-		if(sf_command(player->ov_file, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
-			player->format = AL_FORMAT_BFORMAT2D_16;
-	}
-	else if(player->ov_info.channels == 4)
-	{
-		if(sf_command(player->ov_file, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
-			player->format = AL_FORMAT_BFORMAT3D_16;
-	}
-	*/
 	if(!player->format)
 	{
 		fprintf(stderr, "Unsupported channel count: %d\n", player->ov_info.channels);
@@ -304,11 +291,9 @@ void ClosePlayerFile(StreamPlayer *player)
 		fclose(player->fp);
 	if(player->ov_file)
 		player->ov_file = NULL;
-	/*
 	if(player->membuf)
 	{
 		free(player->membuf);
 		player->membuf = NULL;
 	}
-	*/
 }
