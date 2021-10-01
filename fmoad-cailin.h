@@ -133,13 +133,11 @@ typedef enum FM_RESULT {
 	FM_ERR_TOOMANYSAMPLES
 } FM_RESULT;
 
-#define FM_VECTOR			float
-
 typedef struct FM_3D_ATTRIBUTES{
-	FM_VECTOR position;
-	FM_VECTOR velocity;
-	FM_VECTOR forward;
-	FM_VECTOR up;
+	float position;
+	float velocity;
+	float forward;
+	float up;
 } FM_3D_ATTRIBUTES;
 
 typedef struct BANK{
@@ -216,8 +214,3 @@ FM_RESULT FMOD_Studio_VCA_SetVolume(VCA *vca, float volume);
 FM_RESULT FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume);
 
 int get_sound_idx(char *path);
-
-#if 0
-const char **get_event_paths(BANK *bank);
-const char **get_vca_paths(BANK *bank);
-#endif

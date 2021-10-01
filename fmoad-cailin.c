@@ -27,39 +27,6 @@ int get_sound_idx(char *path)
 	return -1;	// not found, this is an error
 }
 
-#if 0
-const char **get_event_paths(BANK *bank)
-{
-	json_object *events = json_object_object_get(bank->jo, "events");	// TODO: replace with json_object_object_get_ex()
-	size_t n_events = json_object_array_length(events);
-	const char** ret = NULL;
-	json_object *event;
-	for (int i = 0; i < n_events; i++)
-	{
-		event = json_object_array_get_idx(events, i);
-		//if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
-		ret[i] = json_object_get_string(json_object_object_get(event, "path"));
-		DPRINT(1, "%d: %s", i+1, ret[i]);
-	}
-	return ret;
-}
-
-const char **get_vca_paths(BANK *bank)
-{
-	json_object *vcas = json_object_object_get(bank->jo, "VCAs");	// TODO: replace with json_object_object_get_ex()
-	size_t n_vcas = json_object_array_length(vcas);
-	const char** ret = NULL;
-	json_object *vca;
-	for (int i = 0; i < n_vcas; i++)
-	{
-		vca = json_object_array_get_idx(vcas, i);
-		ret[i] = json_object_get_string(json_object_object_get(vca, "path"));
-		DPRINT(1, "%d: %s", i+1, ret[i]);
-	}
-	return ret;
-}
-#endif
-
 FM_RESULT FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 {
 	/* TODO: FMOD_Studio_System_Create is the first function called by Celeste.
@@ -86,7 +53,6 @@ FM_RESULT FMOD_Studio_System_Initialize(SYSTEM *system,
 	FM_INITFLAGS flags,
 	void *extradriverdata)
 {
-	// ignoring studioflags, flags , and extradriverdata for now
 	fprintf(stderr, "%s maxchannels: %d\n", __func__, maxchannels);
 	return FM_OK;
 }
@@ -95,9 +61,7 @@ FM_RESULT FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 	int listener,
 	FM_3D_ATTRIBUTES *attributes)
 {
-	/* listener: the "listener index"
-	 * attributes: are 3D attributes of the listener
-	 */
+	 //attributes: are 3D attributes of the listener
 	DPRINT(2, "listener %d", listener);
 	return FM_OK;
 }
@@ -106,12 +70,9 @@ FM_RESULT FMOD_Studio_System_Update(SYSTEM *system)
 {
 	for (int i = 0; i < sp_counter; i++)
 	{
-		if(!UpdatePlayer(&StreamPlayerArr[i]))
+		if(!UpdatePlayer(&StreamPlayerArr[i])) // returns 0 when playback finished or errors occurred. Prints a message if error.
 		{
-			/*
-			fprintf(stderr, "ERROR in UpdatePlayer; i: %d, sp_counter: %d\n", i, sp_counter);
-			exit(1);
-			*/
+			// TODO: retire StreamPlayerArr[i]
 		}
 	}
 	return FM_OK;
@@ -134,14 +95,13 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	strlcat(db, "o", sizeof(db) * MAXSTR); // TODO: check return val
 	strlcpy(jo_path, shortname, MAXSTR);
 	strlcat(jo_path, ".json", MAXSTR);
+
 	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	BANK *newbank = malloc(sizeof(BANK));
 	if (!newbank)
 		err(1, NULL);
 	// TODO: free() later
-
 	json_object *jo = json_object_from_file(jo_path);
-
 	newbank->name = basename(shortname);
 	newbank->parentdir = dirname(shortname);
 	newbank->bankpath = filename;
@@ -150,21 +110,6 @@ FM_RESULT FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	newbank->path = json_object_get_string(json_object_object_get(newbank->jo, "path"));
 	newbank->guid = json_object_get_string(json_object_object_get(newbank->jo, "GUID"));
 	DPRINT(2, "filename: %s, shortname: %s, db: %s, jo_path: %s, path: %s, guid: %s", filename, shortname, db, jo_path, newbank->path, newbank->guid);
-
-	/*
-	json_object *test = json_object_object_get(newbank->jo, "events");
-	size_t n_test = json_object_array_length(test);
-	DPRINT(1, "n_test: %zu", n_test);
-	json_object *test_obj;
-	for (int i = 0; i < n_test; i++)
-	{
-		test_obj = json_object_array_get_idx(test, i);
-		if (!strncmp("event:/env/amb/worldmap", json_object_get_string(json_object_object_get(test_obj, "path")), MAXSTR))
-		{
-			DPRINT(1, "%d: %s\n", i+1, json_object_get_string(json_object_object_get(test_obj, "path")));
-		}
-	}
-	*/
 
 	*bank = newbank;
 	return FM_OK;
