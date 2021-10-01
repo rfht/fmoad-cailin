@@ -218,7 +218,10 @@ FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdes
 	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, fp: %s, path: %s, issample: %d", sp_counter, sound_num, sounds[sound_num].fp, sounds[sound_num].path, sounds[sound_num].issample);
 	StreamPlayerArr[sp_counter] = *NewPlayer();
 	if (!OpenPlayerFile(&StreamPlayerArr[sp_counter], sounds[newinstance->evd->sound_idx].fp))
-		return FM_OK;	// TODO: return an error instead
+	{
+		fprintf(stderr, "ERROR with OpenPlayerFile; aborting\n");
+		exit(1);	// TODO: return an error instead
+	}
 	StreamPlayerArr[sp_counter].fm_path = sounds[newinstance->evd->sound_idx].path;
 	newinstance->sp_idx = sp_counter++;
 	*instance = newinstance;
@@ -234,11 +237,15 @@ FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, 
 
 FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
-	STUB();
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
-	DPRINT(3, "sound_idx: %d", eventinstance->evd->sound_idx);
-	DPRINT(3, "sound object path: %s", sounds[eventinstance->evd->sound_idx].path);
-	al_play(&sounds[eventinstance->evd->sound_idx]);
+	DPRINT(1, "sound_idx: %d, sp_idx: %d", eventinstance->evd->sound_idx, eventinstance->sp_idx);
+	DPRINT(1, "sound object path: %s", sounds[eventinstance->evd->sound_idx].path);
+	if(!StartPlayer(&StreamPlayerArr[eventinstance->sp_idx]))
+	{
+		fprintf(stderr, "ERROR in StartPlayer\n");
+		exit(1);
+	}
+	//al_play(&sounds[eventinstance->evd->sound_idx]);
 	// TODO: check return value
 	return FM_OK;
 }
