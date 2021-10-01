@@ -189,8 +189,10 @@ FM_RESULT FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDES
 	newevent->path = path;
 	newevent->sound_idx = get_sound_idx((char *)path);	// returns -1 if error;
 	DPRINT(1, "path: %s, sound_idx: %d", newevent->path, newevent->sound_idx);
+	/* THIS SHOULD BE HANDLED IN ..._CreateInstance
 	if (newevent->sound_idx < 0)
-		return FM_OK;	// TODO: return an actual error
+		return FM_ERR_INTERNAL;
+	*/
 	*event = newevent;
 	return FM_OK;
 }
@@ -203,6 +205,11 @@ FM_RESULT FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdes
 
 FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance)
 {
+	if (eventdescription->sound_idx < 0)
+	{
+		instance = NULL;
+		return FM_OK;	// don't mess; just keep going
+	}
 	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
 	newinstance->evd = eventdescription;
 	int sound_num = newinstance->evd->sound_idx;
@@ -228,6 +235,11 @@ FM_RESULT FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, 
 
 FM_RESULT FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
+	if (!eventinstance)
+	{
+		// something went wrong earlier - bail
+		return FM_OK;
+	}
 	//playOgg("/home/thfr/games/fnaify/celeste/1.3.1.2/unzipped/Content/FMOD/Desktop/sfx.banko/sfx-char_mad_death.ogg");
 	DPRINT(1, "sound_idx: %d, sp_idx: %d", eventinstance->evd->sound_idx, eventinstance->sp_idx);
 	DPRINT(1, "sound object path: %s", sounds[eventinstance->evd->sound_idx].path);

@@ -10,32 +10,10 @@
 #include <vorbis/vorbisfile.h>
 
 #define MAXSOUNDS	65536
-//#define NUM_BUFFERS	4
-#define NUM_BUFFERS	64
+#define NUM_BUFFERS	16
 #define BUFFER_SIZE	65536
-//#define BUFFER_SAMPLES	8192
-#define BUFFER_SAMPLES	65536*16
+#define BUFFER_SAMPLES	65536
 #define NUM_SOURCES	16
-
-// disable until reviewed
-#if 0
-struct StreamingAudioData
-{
-	ALuint buffers[NUM_BUFFERS];
-	char *filename;
-	int file;		// file descriptor
-	uint8_t channels;
-	int32_t sampleRate;
-	uint8_t bitsPerSample;
-	ALsizei size;
-	ALuint source;
-	ALsizei sizeConsumed = 0;
-	ALenum format;
-	OggVorbis_File oggVorbisFile;
-	int32_t oggCurrentSection = 0;
-	size_t duration;
-};
-#endif
 
 // based on openal-soft's alstream.c example
 typedef struct StreamPlayer {
