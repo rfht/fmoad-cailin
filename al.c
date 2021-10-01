@@ -225,12 +225,18 @@ int UpdatePlayer(StreamPlayer *player)
 int OpenPlayerFile(StreamPlayer *player, const char *filename)
 {
 	size_t frame_size;
+	player->ov_file = (OggVorbis_File *)malloc(sizeof(OggVorbis_File));
 
-	ClosePlayerFile(player);
+	//ClosePlayerFile(player);
 
 	/* Open the audio file and check that it's usable. */
 	player->fp = fopen(filename, "r");
-	if(ov_open_callbacks(player->fp, player->ov_file, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0)
+	if (!player->fp)
+	{
+		fprintf(stderr, "Failed to open %s\n", filename);
+		exit(1);
+	}
+	if(ov_open_callbacks(player->fp, player->ov_file, NULL, 0, OV_CALLBACKS_DEFAULT) < 0)
 	{
 		fprintf(stderr, "Could not open audio in %s\n", filename);
 		return 0;
@@ -276,9 +282,13 @@ void ClosePlayerFile(StreamPlayer *player)
 		fclose(player->fp);
 	if(player->ov_file)
 		player->ov_file = NULL;
-
-	free(player->membuf);
-	player->membuf = NULL;
+	/*
+	if(player->membuf)
+	{
+		free(player->membuf);
+		player->membuf = NULL;
+	}
+	*/
 }
 
 // functions borrowed from C++ (https://indiegamedev.net/2020/01/16/how-to-stream-ogg-files-with-openal-in-c/) disabled for now

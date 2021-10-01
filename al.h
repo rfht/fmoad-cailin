@@ -51,7 +51,7 @@ typedef struct StreamPlayer {
 } StreamPlayer;
 
 typedef struct SoundObject{
-	const char *fp;		// filepath
+	char *fp;		// filepath
 	const char *path;	// FMOD internal path
 	bool issample;
 } SoundObject;

@@ -214,6 +214,13 @@ FM_RESULT FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdes
 {
 	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
 	newinstance->evd = eventdescription;
+	int sound_num = newinstance->evd->sound_idx;
+	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, fp: %s, path: %s, issample: %d", sp_counter, sound_num, sounds[sound_num].fp, sounds[sound_num].path, sounds[sound_num].issample);
+	StreamPlayerArr[sp_counter] = *NewPlayer();
+	if (!OpenPlayerFile(&StreamPlayerArr[sp_counter], sounds[newinstance->evd->sound_idx].fp))
+		return FM_OK;	// TODO: return an error instead
+	StreamPlayerArr[sp_counter].fm_path = sounds[newinstance->evd->sound_idx].path;
+	newinstance->sp_idx = sp_counter++;
 	*instance = newinstance;
 	return FM_OK;
 }
@@ -290,7 +297,7 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			file = json_object_array_get_idx(files, 0);
 			filename = (char *)json_object_get_string(json_object_object_get(file, "filename"));
 			issample = json_object_get_boolean(json_object_object_get(file, "issample"));
-			char ogg_path[MAXSTR];
+			char *ogg_path = reallocarray(NULL, MAXSTR, sizeof(char));
 			strlcpy(ogg_path, bank->dirbank, MAXSTR);
 			strlcat(ogg_path, "/", MAXSTR);
 			strlcat(ogg_path, bank->name, MAXSTR);
@@ -300,18 +307,10 @@ FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			DPRINT(1, "ogg_path: %s", ogg_path);
 			DPRINT(1, "issample: %d", issample);
 			sounds[sound_counter].fp = ogg_path;
+			//strlcpy(sounds[sound_counter].fp, ogg_path, MAXSTR);
 			sounds[sound_counter].path = path;
 			sounds[sound_counter].issample = issample;
 			sound_counter++;
-			
-			/*
-			DPRINT(1, "sp_counter: %d", sp_counter);
-			StreamPlayerArr[sp_counter] = *NewPlayer();
-			if (!OpenPlayerFile(&StreamPlayerArr[sp_counter], ogg_path))
-				continue;
-			StreamPlayerArr[sp_counter].fm_path = path;
-			sp_counter++;
-			*/
 		}
 	}
 	DPRINT(2, "sound_counter: %d", sound_counter);

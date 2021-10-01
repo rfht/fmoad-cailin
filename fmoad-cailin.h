@@ -160,6 +160,7 @@ typedef struct EVENTDESCRIPTION{
 
 typedef struct EVENTINSTANCE{
 	EVENTDESCRIPTION *evd;
+	int sp_idx;
 } EVENTINSTANCE;
 
 FM_RESULT FMOD_Studio_Bank_LoadSampleData(BANK *bank);
