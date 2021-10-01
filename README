@@ -10,34 +10,50 @@ Similar project: https://github.com/moon-chilled/openfmod
 What You Need
 -------------
 
-* fsb-extract-dumb
-* python-fsb5 with extract.py (fsb5-extract module on OpenBSD)
-* manifest files
+* [fsb-extract-dumb](https://github.com/moon-chilled/fsb-extract-dumb)
+* [python-fsb5](https://github.com/HearthSim/python-fsb5) with extract.py (fsb5-extract module on OpenBSD)
+* [manifest files](https://files.catbox.moe/yej6xx.tgz)
 * json-c
-* ...
+* openal
+* vorbisfile
+* alut (freealut)
 
 How To Use
 ----------
 
-... under construction ...
+Same preparation as with [openfmod](https://github.com/moon-chilled/openfmod):
 
-JSON Files
+- Grab fsb-extract-dumb (https://github.com/moon-chilled/fsb-extract-dumb)
+- run fsb-extract-dumb file.bank
+  generates a file like file.fsb
+- Grab python-fsb5 (https://github.com/HearthSim/python-fsb5)
+  python3 extract.py file.fsb -o file.banko
+  * (Don't use pypy, it's slower.)
+- so:
+  for i in *.bank; do fsb-extract-dumb "$i"; fsb5-extract "${i/bank/fsb}" -o "${i}o"; done
+
+- You also need manifest files for all the bank files.
+- For celeste, use (https://files.catbox.moe/y1p0gd.tgz)
+  - (Actually, use https://files.catbox.moe/yej6xx.tgz)
+  - Extract, and move all json files into the same directory as the .bank files.
+
+How to Build
+------------
+
+```
+$ make
+```
+
+And Then?
+---------
+
+Drop file `libfmodstudio.so` in the game's directory. Make sure the dllmap file(s) for the game point for all {,lib}fmod{,studio} to this file.
+
+What Works
 ----------
 
-* find basename with jq:
+* Celeste (partially; being tested at the moment)
 
-```
-$ jq '.events[] | select(.path == "event:/char/madeline/jump") | .files[] | .filename' path/to/file.json
-$ # => returns "char_mad_jump"
-```
-* prepend name of the database:
-```
-$ jq '.path' path/to/file.json
-$ # => returns ""bank:/sfx"
-```
-* construct the final path with directories and extension:
-```
-./Content/FMOD/Desktop/sfx.banko/sfx-char_mad_jump.ogg
-```
+Other games remain to be seen...
 
 License: ISC
