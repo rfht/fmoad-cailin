@@ -29,6 +29,17 @@ int get_sound_idx(char *path)
 	return -1;	// not found, this is an error
 }
 
+VCA *NewVca(void)
+{
+	VCA *vca;
+	vca = malloc(sizeof(*vca));
+	assert(vca != NULL);
+	vca->path = NULL;
+	vca->volume = 1.0;		// Start new VCAs at full volume
+	vca->finalvolume = 1.0;
+	return vca;
+}
+
 int FMOD_Studio_System_Create(SYSTEM **system, unsigned int headerversion)
 {
 	/* TODO: FMOD_Studio_System_Create is the first function called by Celeste.
@@ -87,7 +98,6 @@ int FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 {
 	size_t fnlen;
 	char jo_path[MAXSTR];
-	// TODO: free() later
 	char *db = reallocarray(NULL, MAXSTR, sizeof(char));
 
 	fnlen = strnlen(filename, MAXSTR);
@@ -99,11 +109,9 @@ int FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	strlcpy(jo_path, shortname, MAXSTR);
 	strlcat(jo_path, ".json", MAXSTR);
 
-	// TODO: Store the bank which with fsb-extract-dumb + python-fsb5 is a directory "*.banko"
 	BANK *newbank = malloc(sizeof(BANK));
 	if (!newbank)
 		err(1, NULL);
-	// TODO: free() later
 	json_object *jo = json_object_from_file(jo_path);
 	newbank->name = basename(shortname);
 	newbank->parentdir = dirname(shortname);
@@ -120,20 +128,28 @@ int FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 
 int FMOD_Studio_System_GetVCA(SYSTEM *system, char *path, VCA **vca)
 {
-	DPRINT(2, "path: %s", path);
-	STUB();
+	DPRINT(2, "STUB; path: %s", path);
+	VCA *newvca = NewVca();
+	newvca->path = path;
+	*vca = newvca;
+	return 0;
 }
 
 int FMOD_Studio_VCA_SetVolume(VCA *vca, float volume)
 {
-	DPRINT(1, "volume: %f", volume);
-	// TODO: store the volume for the VCA
-	STUB();
+	DPRINT(1, "STUB; volume: %.2f", volume);
+	vca->volume = volume;
+	vca->finalvolume = volume;	// for now keep volume and finalvolume the same
+	return 0;
 }
 
 int FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 {
-	STUB();
+	DPRINT(1, "STUB; vca path: %s, volume: %.2f, finalvolume: %.2f", vca->path,
+		vca->volume, vca->finalvolume);
+	*volume = vca->volume;
+	*finalvolume = vca->finalvolume;
+	return 0;
 }
 
 int FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
@@ -142,8 +158,8 @@ int FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTI
 	if (!newevent)
 		err(1, NULL);
 	newevent->path = path;
-	newevent->sound_idx = get_sound_idx((char *)path);	// returns -1 if error;
-	/* Errors (sound_idx < -) are handled in ..._CreateInstance */
+	newevent->sound_idx = get_sound_idx((char *)path);
+	/* Errors (sound_idx < 0) are handled in ..._CreateInstance */
 	DPRINT(1, "path: %s, sound_idx: %d", newevent->path, newevent->sound_idx);
 	*event = newevent;
 	return 0;
@@ -210,8 +226,7 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 
 int FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *is3D)
 {
-	DPRINT(2, "STUB; is3D %d", *is3D);
-	return 0;
+	STUB();
 }
 
 int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
@@ -337,8 +352,11 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
-	// TODO: schedule instance to be destroyed when it stops
-	DPRINT(1, "path: %s", eventinstance->evd->path);
+	if (eventinstance)	// don't do anything if eventinstance has already been emptied
+	{
+		// TODO: schedule instance to be destroyed when it stops
+		DPRINT(1, "path: %s", eventinstance->evd->path);
+	}
 	return 0;
 }
 

@@ -137,3 +137,5 @@ int FMOD_Studio_VCA_SetVolume(VCA *vca, float volume);
 int FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume);
 
 int get_sound_idx(char *path);
+
+VCA *NewVca(void);
