@@ -25,6 +25,7 @@
 
 #define PROJ		"FMOAD-CAILIN"	// project name
 #define MAXSTR		1024
+#define MAX_INST_SP	1024	// maximum StreamPlayers referenced in eventinstance
 
 #define FM_INITFLAGS			unsigned int
 #define FM_SOUND			int
@@ -95,7 +96,8 @@ typedef struct EVENTDESCRIPTION{
 
 typedef struct EVENTINSTANCE{
 	EVENTDESCRIPTION *evd;
-	int sp_idx;
+	int n_sp;			// number of StreamPlayers in sp_idx
+	int sp_idx[MAX_INST_SP];	// array of integers referring to StreamPlayers
 } EVENTINSTANCE;
 
 int FMOD_Studio_Bank_LoadSampleData(BANK *bank);

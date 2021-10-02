@@ -21,6 +21,8 @@ int get_sound_idx(char *path)
 {
 	for (int i = 0; i < sound_counter; i++)
 	{
+		if (!sounds[i].path)	// skip if an empty entry
+			continue;
 		if (!strncmp(path, sounds[i].path, MAXSTR))
 			return i;
 	}
@@ -156,6 +158,7 @@ int FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescripti
 int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescription, EVENTINSTANCE **instance)
 {
 	int player_idx = -1; // -1 would be invalid
+	int i;
 
 	if (eventdescription->sound_idx < 0)
 	{
@@ -165,31 +168,42 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
 	newinstance->evd = eventdescription;
 	int sound_num = newinstance->evd->sound_idx;
-	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, fp: %s, path: %s", sp_counter, sound_num, sounds[sound_num].fp, sounds[sound_num].path);
+	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, path: %s, n_filepaths: %d", sp_counter, sound_num, sounds[sound_num].path, sounds[sound_num].n_filepaths);
 
-	// check if a retired StreamPlayer can be reused
-	for (int i = 0; i <= sp_counter; i++)
+	for (i = 0;
+		i < sounds[newinstance->evd->sound_idx].n_filepaths;
+		i++)
 	{
-		if (StreamPlayerArr[i].retired)
+		if (i >= MAX_INST_SP)
 		{
-			player_idx = i;
-			break;
+			fprintf(stderr, "Error: exceding maximum number of StreamPlayers that can be associated with an EventInstance.\n");
+			exit(1);
 		}
-	}
+		// check if a retired StreamPlayer can be reused
+		for (int j = 0; j <= sp_counter; j++)
+		{
+			if (StreamPlayerArr[j].retired)
+			{
+				player_idx = j;
+				break;
+			}
+		}
 
-	// no retired StreamPlayer found; therefore create a new one
-	if (player_idx < 0)
-		player_idx = sp_counter++;
+		// no retired StreamPlayer found; therefore create a new one
+		if (player_idx < 0)
+			player_idx = sp_counter++;
 
-	memset(&StreamPlayerArr[player_idx], 0, sizeof(StreamPlayer));
-	StreamPlayerArr[player_idx] = *NewPlayer();
-	if (!OpenPlayerFile(&StreamPlayerArr[player_idx], sounds[newinstance->evd->sound_idx].fp))
-	{
-		fprintf(stderr, "ERROR with OpenPlayerFile; aborting\n");
-		exit(1);	// TODO: return an error instead
+		memset(&StreamPlayerArr[player_idx], 0, sizeof(StreamPlayer));
+		StreamPlayerArr[player_idx] = *NewPlayer();
+		if (!OpenPlayerFile(&StreamPlayerArr[player_idx], sounds[newinstance->evd->sound_idx].filepaths[i]))
+		{
+			fprintf(stderr, "ERROR with OpenPlayerFile; aborting\n");
+			exit(1);	// TODO: return an error instead
+		}
+		StreamPlayerArr[player_idx].fm_path = sounds[newinstance->evd->sound_idx].path;
+		newinstance->sp_idx[i] = player_idx;
 	}
-	StreamPlayerArr[player_idx].fm_path = sounds[newinstance->evd->sound_idx].path;
-	newinstance->sp_idx = player_idx;
+	newinstance->n_sp = i;
 	*instance = newinstance;
 	return 0;
 }
@@ -203,16 +217,21 @@ int FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *
 
 int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
+	int i;
+
 	if (!eventinstance)
 	{
 		// something went wrong earlier - bail
 		return 0;
 	}
-	DPRINT(1, "sound_idx: %d, sp_idx: %d, path: %s", eventinstance->evd->sound_idx, eventinstance->sp_idx, sounds[eventinstance->evd->sound_idx].path);
-	if(!StartPlayer(&StreamPlayerArr[eventinstance->sp_idx]))
+	for (i = 0; i < eventinstance->n_sp; i++)
 	{
-		fprintf(stderr, "ERROR in StartPlayer\n");
-		exit(1);
+		DPRINT(1, "sound_idx: %d, sp_idx: %d, path: %s", eventinstance->evd->sound_idx, eventinstance->sp_idx[i], sounds[eventinstance->evd->sound_idx].path);
+		if(!StartPlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]))
+		{
+			fprintf(stderr, "ERROR in StartPlayer\n");
+			exit(1);
+		}
 	}
 	return 0;
 }
@@ -253,23 +272,29 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	json_object *events = json_object_object_get(bank->jo, "events");
 	size_t n_events = json_object_array_length(events);
 	json_object *event;
-	json_object *files;
-	json_object *file;
-	char *path;
-	char *filename;
-	//bool issample;
 	for (int i = 0; i < n_events; i++)
 	{
+		DPRINT(1, "i: %d", i);
+		int j;
+		json_object *files;
+		json_object *file;
+		int num_files;
+		char *filename;
+		char *path;
 		event = json_object_array_get_idx(events, i);
 		files = json_object_object_get(event, "files");
 		path = (char *)json_object_get_string(json_object_object_get(event, "path"));
-		DPRINT(1, "%s: %zu", path, json_object_array_length(files));
-		if (json_object_array_length(files) == 1)	// TODO: not accounting for >1
+		num_files = json_object_array_length(files);
+		char **filepaths_buf = reallocarray(NULL, num_files, sizeof(char*));
+		DPRINT(1, "%s: %d", path, num_files);
+		sounds[sound_counter].filepaths = NULL;
+		for (j = 0;
+			j < num_files;
+			j++)
 		{
 			filename[0] = '\0';	// empty the string array
-			file = json_object_array_get_idx(files, 0);
+			file = json_object_array_get_idx(files, j);
 			filename = (char *)json_object_get_string(json_object_object_get(file, "filename"));
-			//issample = json_object_get_boolean(json_object_object_get(file, "issample"));
 			char *ogg_path = reallocarray(NULL, MAXSTR, sizeof(char));
 			strlcpy(ogg_path, bank->dirbank, MAXSTR);
 			strlcat(ogg_path, "/", MAXSTR);
@@ -278,12 +303,14 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 			strlcat(ogg_path, filename, MAXSTR);
 			strlcat(ogg_path, ".ogg", MAXSTR);
 			DPRINT(1, "ogg_path: %s", ogg_path);
-			//DPRINT(1, "issample: %d", issample);
-			sounds[sound_counter].fp = ogg_path;
+			//sounds[sound_counter].filepaths[j] = ogg_path;
+			filepaths_buf[j] = reallocarray(NULL, MAXSTR, sizeof(char));
+			filepaths_buf[j] = ogg_path;
 			sounds[sound_counter].path = path;
-			//sounds[sound_counter].issample = issample;
-			sound_counter++;
 		}
+		sounds[sound_counter].n_filepaths = j;
+		sounds[sound_counter].filepaths = filepaths_buf;
+		sound_counter++;
 	}
 	DPRINT(2, "sound_counter: %d", sound_counter);
 	return 0;
@@ -325,10 +352,14 @@ int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mo
 {
 	if (eventinstance)	// avoid doing anything if there's a NULL
 	{
-		DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx, eventinstance->evd->path);
-		// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
-		DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx]);
-		// TODO: check return value
+		int i;
+		for (i = 0; i < eventinstance->n_sp; i++)
+		{
+			DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx[i], eventinstance->evd->path);
+			// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
+			DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
+			// TODO: check return value
+		}
 	}
 	return 0;
 }

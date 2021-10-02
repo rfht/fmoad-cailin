@@ -50,8 +50,8 @@ typedef struct StreamPlayer {
 } StreamPlayer;
 
 typedef struct SoundObject{
-	char **filepaths;		// array of filepaths
 	unsigned int n_filepaths;	// number of filepaths in array
+	char **filepaths;		// array of filepaths
 	const char *path;		// FMOD internal path
 	//bool issample;
 } SoundObject;
