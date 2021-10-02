@@ -258,6 +258,7 @@ int FMOD_Studio_System_GetBus(SYSTEM *system, char *path, BUS **bus)
 
 int FMOD_Studio_Bus_SetPaused(BUS *bus, bool paused)
 {
+	// true = paused, false = unpaused
 	DPRINT(1, "STUB; paused %d", (int)paused);
 	return 0;
 }
@@ -269,14 +270,18 @@ int FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
 
 int FMOD_Studio_EventInstance_GetDescription(EVENTINSTANCE *eventinstance, EVENTDESCRIPTION **description)
 {
-	STUB();
+	*description = eventinstance->evd;
+	return 0;
 }
 
 int FMOD_Studio_EventDescription_GetPath(EVENTDESCRIPTION *eventdescription, char *path, int size, int *retrieved)
 {
-	path = "event:/env/amb/worldmap\0";	// corresponds to ./Content/FMOD/Desktop/sfx.banko/sfx-env_amb_worldmap.ogg
-	*retrieved = strnlen(path, size) + 1;	// +1 to account for terminating null character
-	DPRINT(1, "path %s, buffer size %d, retrieved %d", path, size, *retrieved);
+	if (eventdescription)
+	{
+		path = (char *)eventdescription->path;
+		*retrieved = strnlen(path, size - 1) + 1;	// +1 to account for terminating null character
+		DPRINT(1, "path %s, buffer size %d, retrieved %d", path, size, *retrieved);
+	}
 	return 0;
 }
 
@@ -352,10 +357,15 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
+	STUB();
 	if (eventinstance)	// don't do anything if eventinstance has already been emptied
 	{
-		// TODO: schedule instance to be destroyed when it stops
-		DPRINT(1, "path: %s", eventinstance->evd->path);
+		for (int i = 0; i < eventinstance->n_sp; i++)
+		{
+			// TODO: schedule instance to be destroyed when it stops
+			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
+				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
+		}
 	}
 	return 0;
 }
@@ -376,6 +386,7 @@ int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mo
 			// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
 			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
 				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
+			//StopPlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
 			// TODO: check return value
 		}
 	}

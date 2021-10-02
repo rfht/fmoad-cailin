@@ -110,12 +110,9 @@ int StartPlayer(StreamPlayer *player)
 	for(i = 0; i < NUM_BUFFERS; i++)
 	{
 		/* Get some data to give it to the buffer */
-		//long slen = sf_readf_short(player->ov_file, player->membuf, BUFFER_SAMPLES);
-		// TODO: third parameter (4096) (int length) should be length of the buffer in bytes
 		long ov_len = ov_read(player->ov_file, player->membuf, BUFFER_SAMPLES, 0, 2, 1, &current_section);
 		if(ov_len < 1) break;
 
-		//ov_len *= player->ov_info.channels * (long)sizeof(char);	// This distorts audio!
 		alBufferData(player->buffers[i], player->format, player->membuf, (ALsizei)ov_len,
 			player->ov_info.rate);
 	}
@@ -134,6 +131,17 @@ int StartPlayer(StreamPlayer *player)
 		return 0;
 	}
 
+	return 1;
+}
+
+int StopPlayer(StreamPlayer *player)
+{
+	alSourceStop(player->source);
+	if (alGetError() != AL_NO_ERROR)
+	{
+		fprintf(stderr, "Error stopping playback\n");
+		return 0;
+	}
 	return 1;
 }
 

@@ -27,11 +27,8 @@
 #include <vorbis/vorbisfile.h>
 
 #define MAXSOUNDS	65536
-//#define MAXSOUNDS	4096
 #define NUM_BUFFERS	16
-//#define NUM_BUFFERS	4
 #define BUFFER_SAMPLES	65536
-//#define BUFFER_SAMPLES	4096
 #define NUM_SOURCES	16
 
 // based on openal-soft's alstream.c example
@@ -41,11 +38,10 @@ typedef struct StreamPlayer {
 
 	FILE *fp;
 	OggVorbis_File *ov_file;
-	vorbis_info ov_info;
+	vorbis_info ov_info;	// contains samplerate
 	char *membuf;
 	const char *fm_path;	// FMOD internal path
 
-	/* The format of the output stream (sample rate is in ov_info) */
 	ALenum format;
 
 	bool retired;
@@ -55,7 +51,6 @@ typedef struct SoundObject{
 	unsigned int n_filepaths;	// number of filepaths in array
 	char **filepaths;		// array of filepaths
 	const char *path;		// FMOD internal path
-	//bool issample;
 } SoundObject;
 
 static SoundObject sounds[MAXSOUNDS];
@@ -66,14 +61,15 @@ static unsigned int sp_counter = 0;
 
 int al_init(void);
 
+SoundObject *NewSoundObject(void);
 StreamPlayer *NewPlayer(void);
+
 void DeletePlayer(StreamPlayer *player);
 void ClosePlayer(StreamPlayer *player);
 int StartPlayer(StreamPlayer *player);
+int StopPlayer(StreamPlayer *player);
 int UpdatePlayer(StreamPlayer *player);
 int OpenPlayerFile(StreamPlayer *player, const char *filename);
 void ClosePlayerFile(StreamPlayer *player);
-
-SoundObject *NewSoundObject(void);
 
 #endif // AL_H
