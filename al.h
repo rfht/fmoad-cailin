@@ -27,9 +27,11 @@
 #include <vorbis/vorbisfile.h>
 
 #define MAXSOUNDS	65536
+//#define MAXSOUNDS	4096
 #define NUM_BUFFERS	16
-#define BUFFER_SIZE	65536
+//#define NUM_BUFFERS	4
 #define BUFFER_SAMPLES	65536
+//#define BUFFER_SAMPLES	4096
 #define NUM_SOURCES	16
 
 // based on openal-soft's alstream.c example
@@ -62,15 +64,7 @@ static unsigned int sound_counter = 0;
 static StreamPlayer StreamPlayerArr[MAXSOUNDS];
 static unsigned int sp_counter = 0;
 
-static ALuint al_buffers[NUM_BUFFERS];
-static ALuint al_sources[NUM_SOURCES];
-
-static int current_buffer;
-static int current_source;
-
 int al_init(void);
-int al_play(SoundObject *so);
-void al_check_error(void);
 
 StreamPlayer *NewPlayer(void);
 void DeletePlayer(StreamPlayer *player);
@@ -79,5 +73,7 @@ int StartPlayer(StreamPlayer *player);
 int UpdatePlayer(StreamPlayer *player);
 int OpenPlayerFile(StreamPlayer *player, const char *filename);
 void ClosePlayerFile(StreamPlayer *player);
+
+SoundObject *NewSoundObject(void);
 
 #endif // AL_H

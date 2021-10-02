@@ -54,7 +54,7 @@ int FMOD_Studio_System_Initialize(SYSTEM *system,
 	FM_INITFLAGS flags,
 	void *extradriverdata)
 {
-	DPRINT(2, "maxchannels: %d", maxchannels);
+	DPRINT(2, " STUB; maxchannels: %d", maxchannels);
 	return 0;
 }
 
@@ -62,7 +62,6 @@ int FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 	int listener,
 	FM_3D_ATTRIBUTES *attributes)
 {
-	 //attributes: are 3D attributes of the listener
 	DPRINT(2, "listener %d", listener);
 	return 0;
 }
@@ -274,20 +273,19 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	json_object *event;
 	for (int i = 0; i < n_events; i++)
 	{
-		DPRINT(1, "i: %d", i);
 		int j;
 		json_object *files;
 		json_object *file;
 		int num_files;
-		char *filename;
-		char *path;
+		char *filename = reallocarray(NULL, MAXSTR, sizeof(char));
+		char *path = reallocarray(NULL, MAXSTR, sizeof(char));
 		event = json_object_array_get_idx(events, i);
 		files = json_object_object_get(event, "files");
 		path = (char *)json_object_get_string(json_object_object_get(event, "path"));
 		num_files = json_object_array_length(files);
 		char **filepaths_buf = reallocarray(NULL, num_files, sizeof(char*));
 		DPRINT(1, "%s: %d", path, num_files);
-		sounds[sound_counter].filepaths = NULL;
+		sounds[sound_counter] = *NewSoundObject();
 		for (j = 0;
 			j < num_files;
 			j++)
@@ -340,7 +338,8 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
 	// TODO: schedule instance to be destroyed when it stops
-	STUB();
+	DPRINT(1, "path: %s", eventinstance->evd->path);
+	return 0;
 }
 
 int FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *volume, float *finalvolume)
@@ -357,7 +356,8 @@ int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mo
 		{
 			DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx[i], eventinstance->evd->path);
 			// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
-			DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
+			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
+				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
 			// TODO: check return value
 		}
 	}

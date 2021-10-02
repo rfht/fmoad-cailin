@@ -16,20 +16,6 @@
 
 #include "al.h"
 
-void al_check_error(void)
-{
-	ALenum error = alGetError();
-	switch(error)
-	{
-		case AL_INVALID_NAME: fprintf(stderr,"invalid name\n"); return;
-		case AL_INVALID_ENUM: fprintf(stderr,"invalid enum\n"); return;
-		case AL_INVALID_VALUE: fprintf(stderr,"invalid value\n"); return;
-		case AL_INVALID_OPERATION: fprintf(stderr,"invalid operation\n"); return;
-		case AL_OUT_OF_MEMORY: fprintf(stderr,"out of memory\n"); return;
-		default: return;
-	}
-}
-
 int al_init(void)
 {
 	const ALCchar *name;
@@ -62,51 +48,6 @@ int al_init(void)
 	return 0;
 }
 
-int al_play(SoundObject *so)
-{
-	/*
-	alBufferData(al_buffers[current_buffer], to_al_format(so->vi->channels), so->handle, so->size, so->vi->rate);
-	al_check_error();
-	alSourceQueueBuffers(al_sources[current_source], 1, &al_buffers[current_buffer]);
-	al_check_error();
-	alSourcePlay(al_sources[current_source]);
-	al_check_error();
-	current_buffer++;
-	if (++current_buffer >= NUM_BUFFERS)
-		current_buffer = 0;
-	if (++current_source >= NUM_SOURCES)
-		current_source = 0;
-	*/
-	/*
-	int eof = 0;
-	while(!eof)
-	{
-		ALuint released[16];
-		ALint count;
-		alGetSourcei(al_sources, AL_BUFFERS_PROCESSED, &count);
-		alSourceUnqueueBuffers(al_sources, count, released);
-		
-		for(int i = 0;i<count;++i)
-		{
-			long pos = 0;
-			while(pos < so->bytes)
-			{
-				long ret = ov_read(&memfile, so->handle+pos, sizeof(so->handle)-pos, 0, 2, 1, &current_section);
-				pos+=ret;
-				if(ret == 0)
-				{
-					eof = 1;
-					break;
-				}
-			}
-			alBufferData(released[i], to_al_format(so->vi->channels), pcmout, pos, so->vi->rate);
-		}
-		alSourceQueueBuffers(al_sources, count, released);
-	}
-	*/
-	return EXIT_SUCCESS;
-}
-
 // from openal-soft's alstream.c example
 StreamPlayer *NewPlayer(void)
 {
@@ -129,6 +70,17 @@ StreamPlayer *NewPlayer(void)
 	return player;
 }
 
+SoundObject *NewSoundObject(void)
+{
+	SoundObject *so;
+	so = malloc(sizeof(*so));
+	assert(so != NULL);
+	so->n_filepaths = 0;
+	so->filepaths = NULL;
+	so->path = "\0";
+	return so;
+}
+
 // from openal-soft's alstream.c example
 void DeletePlayer(StreamPlayer *player)
 {
@@ -138,6 +90,8 @@ void DeletePlayer(StreamPlayer *player)
 		fprintf(stderr, "Failed to delete object IDs\n");
 	player->retired = true;
 	fclose(player->fp);
+	free(player->ov_file);
+	free(player->membuf);
 	//memset(player, 0, sizeof(*player));
 	//free(player);
 }
