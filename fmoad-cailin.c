@@ -113,6 +113,8 @@ int FMOD_Studio_System_LoadBankFile(SYSTEM *system,
 	if (!newbank)
 		err(1, NULL);
 	json_object *jo = json_object_from_file(jo_path);
+	if (!jo)
+		return ERR_FILE_BAD;
 	newbank->name = basename(shortname);
 	newbank->parentdir = dirname(shortname);
 	newbank->bankpath = filename;
@@ -154,12 +156,17 @@ int FMOD_Studio_VCA_GetVolume(VCA *vca, float *volume, float *finalvolume)
 
 int FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTION **event)
 {
+	int sound_idx = get_sound_idx((char *)path);
+	/*
+	if (sound_idx < 0)
+		return ERR_EVENT_NOTFOUND;
+	*/
 	EVENTDESCRIPTION *newevent = malloc(sizeof(EVENTDESCRIPTION));
 	if (!newevent)
 		err(1, NULL);
 	newevent->path = path;
-	newevent->sound_idx = get_sound_idx((char *)path);
-	/* Errors (sound_idx < 0) are handled in ..._CreateInstance */
+	newevent->sound_idx = sound_idx;
+	newevent->has_instance = false;
 	DPRINT(1, "path: %s, sound_idx: %d", newevent->path, newevent->sound_idx);
 	*event = newevent;
 	return 0;
@@ -167,6 +174,8 @@ int FMOD_Studio_System_GetEvent(SYSTEM *system, const char *path, EVENTDESCRIPTI
 
 int FMOD_Studio_EventDescription_LoadSampleData(EVENTDESCRIPTION *eventdescription)
 {
+	if (!eventdescription)
+		return ERR_INVALID_HANDLE;
 	STUB();
 }
 
@@ -175,13 +184,24 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 	int player_idx = -1; // -1 would be invalid
 	int i;
 
+	/* this shouldn't occur anymore, after ..._GetEvent has been adjusted
 	if (eventdescription->sound_idx < 0)
 	{
 		instance = NULL;
-		return 0;	// don't mess; just keep going
+		return 0;
 	}
+	*/
 	EVENTINSTANCE *newinstance = malloc(sizeof(EVENTINSTANCE));
+	if (!eventdescription)
+	{
+		newinstance->evd = NULL;
+		newinstance->playing = false;
+		newinstance->n_sp = 0;
+		newinstance->sp_idx[0] = '\0';
+		return ERR_INVALID_PARAM;
+	}
 	newinstance->evd = eventdescription;
+	newinstance->playing = false;
 	int sound_num = newinstance->evd->sound_idx;
 	DPRINT(1, "sp_counter: %d, evd->sound_idx: %d, path: %s, n_filepaths: %d", sp_counter, sound_num, sounds[sound_num].path, sounds[sound_num].n_filepaths);
 
@@ -216,10 +236,12 @@ int FMOD_Studio_EventDescription_CreateInstance(EVENTDESCRIPTION *eventdescripti
 			exit(1);	// TODO: return an error instead
 		}
 		StreamPlayerArr[player_idx].fm_path = sounds[newinstance->evd->sound_idx].path;
+		ReadyPlayer(&StreamPlayerArr[player_idx]);
 		newinstance->sp_idx[i] = player_idx;
 	}
 	newinstance->n_sp = i;
 	*instance = newinstance;
+	eventdescription->has_instance = true;
 	return 0;
 }
 
@@ -231,21 +253,18 @@ int FMOD_Studio_EventDescription_Is3D(EVENTDESCRIPTION *eventdescription, bool *
 
 int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 {
-	int i;
-
 	if (!eventinstance)
-	{
-		// something went wrong earlier - bail
+		return ERR_INVALID_PARAM;
+	if (eventinstance->playing)
 		return 0;
-	}
-	for (i = 0; i < eventinstance->n_sp; i++)
+	for (int i = 0; i < eventinstance->n_sp; i++)
 	{
 		DPRINT(1, "sound_idx: %d, sp_idx: %d, path: %s", eventinstance->evd->sound_idx, eventinstance->sp_idx[i], sounds[eventinstance->evd->sound_idx].path);
 		if(!StartPlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]))
 		{
-			fprintf(stderr, "ERROR in StartPlayer\n");
-			exit(1);
+			return ERR_INTERNAL;
 		}
+		eventinstance->playing = true;
 	}
 	return 0;
 }
@@ -270,7 +289,8 @@ int FMOD_Studio_Bus_GetPaused(BUS *bus, bool *paused)
 
 int FMOD_Studio_EventInstance_GetDescription(EVENTINSTANCE *eventinstance, EVENTDESCRIPTION **description)
 {
-	*description = eventinstance->evd;
+	if (eventinstance)
+		*description = eventinstance->evd;
 	return 0;
 }
 
@@ -291,11 +311,11 @@ int FMOD_Studio_Bank_LoadSampleData(BANK *bank)
 	json_object *events = json_object_object_get(bank->jo, "events");
 	size_t n_events = json_object_array_length(events);
 	json_object *event;
+	json_object *files;
+	json_object *file;
 	for (int i = 0; i < n_events; i++)
 	{
 		int j;
-		json_object *files;
-		json_object *file;
 		int num_files;
 		char *filename = reallocarray(NULL, MAXSTR, sizeof(char));
 		char *path = reallocarray(NULL, MAXSTR, sizeof(char));
@@ -357,8 +377,10 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
-	STUB();
-	if (eventinstance)	// don't do anything if eventinstance has already been emptied
+	return FMOD_Studio_EventInstance_Stop(eventinstance, 0);	// this is what openfmod does
+
+#if 0
+	if (eventinstance && eventinstance->evd)	// don't do anything if eventinstance has already been emptied
 	{
 		for (int i = 0; i < eventinstance->n_sp; i++)
 		{
@@ -366,7 +388,11 @@ int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
 				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
 		}
+		eventinstance->playing = false;
+		eventinstance->evd = NULL;
+		eventinstance->n_sp = 0;
 	}
+#endif
 	return 0;
 }
 
@@ -377,19 +403,23 @@ int FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *vol
 
 int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mode)
 {
-	if (eventinstance)	// avoid doing anything if there's a NULL
+	if (!eventinstance)
+		return ERR_INVALID_PARAM;
+	if (!eventinstance->playing)
+		return OK;
+
+	for (int i = 0; i < eventinstance->n_sp; i++)
 	{
-		int i;
-		for (i = 0; i < eventinstance->n_sp; i++)
-		{
-			DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx[i], eventinstance->evd->path);
-			// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
-			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
-				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
-			//StopPlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
-			// TODO: check return value
-		}
+		DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx[i], eventinstance->evd->path);
+		// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
+		/*
+		if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
+			DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
+		*/
+		if (!StopPlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]))
+			return ERR_INTERNAL;
 	}
+	eventinstance->playing = false;
 	return 0;
 }
 

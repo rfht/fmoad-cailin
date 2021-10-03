@@ -66,6 +66,7 @@ StreamPlayer *NewPlayer(void);
 
 void DeletePlayer(StreamPlayer *player);
 void ClosePlayer(StreamPlayer *player);
+int ReadyPlayer(StreamPlayer *player);
 int StartPlayer(StreamPlayer *player);
 int StopPlayer(StreamPlayer *player);
 int UpdatePlayer(StreamPlayer *player);
