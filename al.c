@@ -97,7 +97,7 @@ void DeletePlayer(StreamPlayer *player)
 }
 
 // from openal-soft's alstream.c example
-int ReadyPlayer(StreamPlayer *player)
+int StartPlayer(StreamPlayer *player)
 {
 	ALsizei i;
 	int current_section;
@@ -122,20 +122,15 @@ int ReadyPlayer(StreamPlayer *player)
 		return 0;
 	}
 
-	/* Now queue buffers for playback */
+	/* Now queue and start playback! */
 	alSourceQueueBuffers(player->source, i, player->buffers);
-
-	return 1;
-}
-
-int StartPlayer(StreamPlayer *player)
-{
 	alSourcePlay(player->source);
 	if(alGetError() != AL_NO_ERROR)
 	{
 		fprintf(stderr, "Error starting playback\n");
 		return 0;
 	}
+
 	return 1;
 }
 
