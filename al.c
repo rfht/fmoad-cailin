@@ -191,7 +191,7 @@ int UpdatePlayer(StreamPlayer *player)
 	}
 
 	/* Make sure the source hasn't underrun */
-	if(state != AL_PLAYING && state != AL_PAUSED)
+	if(state != AL_PLAYING && state != AL_PAUSED && state != AL_STOPPED)
 	{
 		ALint queued;
 
