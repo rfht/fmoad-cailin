@@ -54,6 +54,8 @@ StreamPlayer *NewPlayer(void)
 	StreamPlayer *player;
 	player = malloc(sizeof(*player));
 	assert(player != NULL);
+	player->status = STOPPED;
+	player->released = false;
 	player->retired = false;
 	alGenBuffers(NUM_BUFFERS, player->buffers);
 	assert(alGetError() == AL_NO_ERROR && "Could not create buffers");
@@ -88,7 +90,7 @@ void DeletePlayer(StreamPlayer *player)
 	alDeleteBuffers(NUM_BUFFERS, player->buffers);
 	if(alGetError() != AL_NO_ERROR)
 		fprintf(stderr, "Failed to delete object IDs\n");
-	player->retired = true;
+	player->released = true;
 	fclose(player->fp);
 	free(player->ov_file);
 	free(player->membuf);

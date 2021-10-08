@@ -31,6 +31,12 @@
 #define BUFFER_SAMPLES	65536
 #define NUM_SOURCES	16
 
+typedef enum {
+	PLAYING,
+	PAUSED,
+	STOPPED
+} PLAYER_STATUS;
+
 // based on openal-soft's alstream.c example
 typedef struct StreamPlayer {
 	ALuint buffers[NUM_BUFFERS];
@@ -44,7 +50,9 @@ typedef struct StreamPlayer {
 
 	ALenum format;
 
-	bool retired;
+	PLAYER_STATUS status;
+	bool released;		// FMOD wants source to be free'd when stopped next
+	bool retired;		// this is an inactive StreamPlayer for reuse
 } StreamPlayer;
 
 typedef struct SoundObject{

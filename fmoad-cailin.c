@@ -79,14 +79,30 @@ int FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 
 int FMOD_Studio_System_Update(SYSTEM *system)
 {
+	DPRINT(4, "Update");
 	for (int i = 0; i < sp_counter; i++)
 	{
-		if(StreamPlayerArr[i].retired == false)
+		if (StreamPlayerArr[i].retired)
+			continue;
+		switch(StreamPlayerArr[i].status)
 		{
-			if(!UpdatePlayer(&StreamPlayerArr[i])) // returns 0 when playback finished or errors occurred. Prints a message if error.
-			{
-				DeletePlayer(&StreamPlayerArr[i]);
-			}
+			case PLAYING:
+				UpdatePlayer(&StreamPlayerArr[i]);
+				// TODO: if UpdatePlayer returns 0; playback is finished
+				break;
+			case PAUSED:
+				break;
+			case STOPPED:
+				StopPlayer(&StreamPlayerArr[i]);
+				/*
+				// TODO: fix this
+				if(StreamPlayerArr[i].released)
+					DeletePlayer(&StreamPlayerArr[i]);
+				*/
+				break;
+			default:
+				// should not be reached
+				fprintf(stderr, "Bad StreamPlayer status.\n");
 		}
 	}
 	return 0;
@@ -246,6 +262,7 @@ int FMOD_Studio_EventInstance_Start(EVENTINSTANCE *eventinstance)
 			fprintf(stderr, "ERROR in StartPlayer\n");
 			exit(1);
 		}
+		StreamPlayerArr[eventinstance->sp_idx[i]].status = PLAYING;
 	}
 	return 0;
 }
@@ -357,17 +374,25 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
+	for (int i = 0; i < eventinstance->n_sp; i++)
+	{
+		StreamPlayerArr[eventinstance->sp_idx[i]].released = true;
+	}
+	return 0;
+
+#if 0
 	STUB();
 	if (eventinstance)	// don't do anything if eventinstance has already been emptied
 	{
 		for (int i = 0; i < eventinstance->n_sp; i++)
 		{
 			// TODO: schedule instance to be destroyed when it stops
-			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
+			if (!StreamPlayerArr[eventinstance->sp_idx[i]].released)
 				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
 		}
 	}
 	return 0;
+#endif
 }
 
 int FMOD_Studio_EventInstance_GetVolume(EVENTINSTANCE *eventinstance, float *volume, float *finalvolume)
@@ -379,15 +404,16 @@ int FMOD_Studio_EventInstance_Stop(EVENTINSTANCE *eventinstance, FM_STOP_MODE mo
 {
 	if (eventinstance)	// avoid doing anything if there's a NULL
 	{
-		int i;
-		for (i = 0; i < eventinstance->n_sp; i++)
+		for (int i = 0; i < eventinstance->n_sp; i++)
 		{
 			DPRINT(1, "stop mode: %d, on sp_idx: %d, path: %s", (int)mode, eventinstance->sp_idx[i], eventinstance->evd->path);
 			// TODO: implement fading out, e.g. https://stackoverflow.com/questions/47384635/how-to-stop-a-sound-smooth-in-openal
-			if (StreamPlayerArr[eventinstance->sp_idx[i]].retired == false)
+			/*
+			if (!StreamPlayerArr[eventinstance->sp_idx[i]].released)
 				DeletePlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
+			*/
 			//StopPlayer(&StreamPlayerArr[eventinstance->sp_idx[i]]);
-			// TODO: check return value
+			StreamPlayerArr[eventinstance->sp_idx[i]].status = STOPPED;
 		}
 	}
 	return 0;
@@ -416,8 +442,11 @@ int FMOD_Studio_EventDescription_IsOneshot(EVENTDESCRIPTION *eventdescription, i
 
 int FMOD_Studio_EventInstance_SetPaused(EVENTINSTANCE *eventinstance, int paused)
 {
-	// TODO: pause eventinstance
-	STUB();
+	for (int i = 0; i < eventinstance->n_sp; i++)
+	{
+		StreamPlayerArr[eventinstance->sp_idx[i]].status = PAUSED;
+	}
+	return 0;
 }
 
 int FMOD_Studio_EventInstance_TriggerCue(EVENTINSTANCE *eventinstance)
@@ -432,7 +461,8 @@ int FMOD_Studio_Bus_StopAllEvents(BUS *bus, FM_STOP_MODE mode)
 
 int FMOD_Studio_EventInstance_GetPaused(EVENTINSTANCE *eventinstance, int *paused)
 {
-	STUB();
+	*paused = (StreamPlayerArr[eventinstance->sp_idx[0]].status == PAUSED);
+	return 0;
 }
 
 int FMOD_Studio_EventInstance_GetPlaybackState(EVENTINSTANCE *eventinstance, int *state)

@@ -32,7 +32,6 @@
 #define FM_STUDIO_INITFLAGS		unsigned int
 #define FM_STUDIO_LOAD_BANK_FLAGS	unsigned int
 #define FM_SYSTEM			int
-//#define FM_STOP_MODE			int
 
 static bool init_done = false;
 static unsigned int loglevel = 0;
