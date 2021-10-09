@@ -79,9 +79,9 @@ int FMOD_Studio_System_SetListenerAttributes(SYSTEM *system,
 
 int FMOD_Studio_System_Update(SYSTEM *system)
 {
-	DPRINT(4, "Update");
 	for (int i = 0; i < sp_counter; i++)
 	{
+		DPRINT(4, "Update streamplayer %d", i);
 		if (StreamPlayerArr[i].retired)
 			continue;
 		switch(StreamPlayerArr[i].status)
@@ -94,11 +94,8 @@ int FMOD_Studio_System_Update(SYSTEM *system)
 				break;
 			case STOPPED:
 				StopPlayer(&StreamPlayerArr[i]);
-				/*
-				// TODO: fix this
 				if(StreamPlayerArr[i].released)
 					DeletePlayer(&StreamPlayerArr[i]);
-				*/
 				break;
 			default:
 				// should not be reached
@@ -374,14 +371,14 @@ int FMOD_Studio_EventInstance_Set3DAttributes(EVENTINSTANCE *eventinstance, int 
 
 int FMOD_Studio_EventInstance_Release(EVENTINSTANCE *eventinstance)
 {
+	STUB();	// TODO: for now stub this; this needs to wait for later to be used
+#if 0
 	for (int i = 0; i < eventinstance->n_sp; i++)
 	{
 		StreamPlayerArr[eventinstance->sp_idx[i]].released = true;
 	}
 	return 0;
 
-#if 0
-	STUB();
 	if (eventinstance)	// don't do anything if eventinstance has already been emptied
 	{
 		for (int i = 0; i < eventinstance->n_sp; i++)

@@ -92,10 +92,10 @@ void DeletePlayer(StreamPlayer *player)
 		fprintf(stderr, "Failed to delete object IDs\n");
 	player->released = true;
 	fclose(player->fp);
-	free(player->ov_file);
-	free(player->membuf);
-	//memset(player, 0, sizeof(*player));
-	//free(player);
+	if (player->ov_file)
+		free(player->ov_file);
+	if (player->membuf)
+		free(player->membuf);
 }
 
 // from openal-soft's alstream.c example
